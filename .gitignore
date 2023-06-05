@@ -1,0 +1,10 @@
+builder/node_modules
+builder/package-lock.json
+
+kernel/node_modules
+kernel/package-lock.json
+
+os/node_modules
+os/package-lock.json
+
+www/js
