@@ -1,8 +1,11 @@
-import { ITaskManager, ITask, TaskManagerEvent, TaskManagerEventCallback, EmitterList, IEmitters } from "phoenix-builder"
+import { ITaskManager, ITask, TaskManagerEvent, TaskManagerEventCallback, IEmitters, IEmitter } from "phoenix-builder"
 
+export type EmitterList = {
+	[k in TaskManagerEvent]?: IEmitter
+}
 export class TaskManager implements ITaskManager {
   #tasks: Map<string, ITask<any>>
-  #emitters: Partial<EmitterList<TaskManagerEvent>>
+  #emitters: EmitterList
   get tasks(): ITask<any>[] {
     const results: ITask<any>[] = []
     this.#tasks.forEach(task => results.push(task))

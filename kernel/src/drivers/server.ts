@@ -1,14 +1,11 @@
 import { Callback, ICipher, IEmitter, IEmitters, IServerConnector, SendArguments } from 'phoenix-builder'
 import { io, Socket } from 'socket.io-client'
 
-const default_opts = {
-  url: window.origin
-}
 export class Server implements IServerConnector {
-  #socket: Socket = io(this.opts.url, { transports: ['websocket'], autoConnect: false })
+  #socket: Socket = io({ transports: ['websocket'], autoConnect: false })
   #connectEmitter: IEmitter = this.emitters.createEmitter()
   #disconnectEmitter: IEmitter = this.emitters.createEmitter()
-  constructor(private emitters: IEmitters, private cipher?: ICipher, private opts = default_opts) {
+  constructor(private emitters: IEmitters, private cipher: ICipher) {
     this.#socket.on('connect', () => this.#connectEmitter.emmit())
     this.#socket.on('disconnect', () => this.#disconnectEmitter.emmit())
   }

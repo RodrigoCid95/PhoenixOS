@@ -4,6 +4,10 @@ builder/package-lock.json
 kernel/node_modules
 kernel/package-lock.json
 
+ionic-ui/dist
+ionic-ui/node_modules
+ionic-ui/package-lock.json
+
 os/node_modules
 os/package-lock.json
 

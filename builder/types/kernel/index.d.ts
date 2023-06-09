@@ -11,3 +11,4 @@ export interface IKernel {
 
 export * from './drivers'
 export * from './task-manager'
+export * from './window'

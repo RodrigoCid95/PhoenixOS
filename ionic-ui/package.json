@@ -1,0 +1,21 @@
+{
+  "name": "ionic-ui",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Stencil App Starter",
+  "types": "dist/types/index.d.ts",
+  "main": "./dist/index.cjs.js",
+  "collection": "./dist/collection/collection-manifest.json",
+  "module": "./dist/index.js",
+  "scripts": {
+    "build": "stencil build --prod"
+  },
+  "devDependencies": {
+    "@ionic/core": "^7.0.10",
+    "@stencil/core": "2.13.0",
+    "ionicons": "^7.1.2",
+    "phoenix-builder": "file:../builder",
+    "puppeteer": "^10.0.0"
+  },
+  "license": "MIT"
+}

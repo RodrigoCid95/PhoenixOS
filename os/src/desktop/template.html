@@ -1,0 +1,43 @@
+<ion-app style="z-index: 0;">
+  <ion-progress-bar type="indeterminate" style="display: none;"></ion-progress-bar>
+  <div class="desktop" slot="desktop"></div>
+  <ion-modal id="launcher">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Apps</ion-title>
+        <ion-buttons slot='end'>
+          <ion-button color='primary' onClick={this.closeLauncher.bind(this)}>
+            <ion-icon slot='icon-only' name='close-outline' />
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list>
+        <!-- {this.manifestResults.map((manifest, ind) => (
+          <ion-item key={ind} onClick={() => this.launch(manifest)} style={{ cursor: 'pointer' }}>
+            <ion-thumbnail slot="start">
+              <img alt={manifest.packageName} src={manifest.icon} />
+            </ion-thumbnail>
+            <ion-label>
+              {manifest.title}
+              <p>
+                {manifest.description}
+              </p>
+            </ion-label>
+          </ion-item>
+        ))} -->
+      </ion-list>
+    </ion-content>
+  </ion-modal>
+  <ion-footer style="z-index: 0;" translucent={true}>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button id="play" color="primary">
+          <ion-icon slot="icon-only" name="apps-outline" />
+        </ion-button>
+      </ion-buttons>
+      <div class="tasks"></div>
+    </ion-toolbar>
+  </ion-footer>
+</ion-app>

@@ -1,7 +1,7 @@
 import { IDriverList, IDriverManager } from "phoenix-builder"
 
 type Imports = {
-  [x in keyof IDriverList]: (opts?: any) => Promise<any>
+  [x in keyof IDriverList]: () => Promise<any>
 }
 export class DriverManager implements IDriverManager {
   #drivers: Map<keyof IDriverList, any> = new Map()
@@ -42,17 +42,17 @@ export class DriverManager implements IDriverManager {
       }
       return this.#drivers.get('permissions')
     },
-    server: async (opts) => {
+    server: async () => {
       if (!this.#drivers.has('server')) {
         const { Server } = await import('./server')
         const cipher = await this.getDriver('cipher')
         const emitters = await this.getDriver('emitters')
-        this.#drivers.set('server', new Server(emitters, cipher, opts))
+        this.#drivers.set('server', new Server(emitters, cipher))
       }
       return this.#drivers.get('server')
     }
   }
-  async getDriver<K extends keyof IDriverList>(name: K, opts?: any): Promise<IDriverList[K]> {
-    return await this.#imports[name](opts)
+  async getDriver<K extends keyof IDriverList>(name: K): Promise<IDriverList[K]> {
+    return await this.#imports[name]()
   }
 }

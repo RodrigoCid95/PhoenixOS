@@ -10,6 +10,3 @@ export interface IEmitters {
 	emmit<T = undefined>(event: string, args?: T): void
 	createEmitter(): IEmitter
 }
-export type EmitterList<T> = {
-	[k in T]: IEmitter
-}
