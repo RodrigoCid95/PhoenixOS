@@ -11,8 +11,9 @@ export interface ITaskClass<T> {
 }
 export type TaskManagerEvent = 'new' | 'kill' | 'change'
 export type TaskManagerEventCallback = () => void
+export type AddTaskOptions = Omit<Omit<ITask<T>, 'PID'>, 'kill'>
 export interface ITaskManager {
-  run<T>(options: Omit<Omit<Omit<ITask<T>, 'PID'>, 'el'>, 'kill'>): ITask<T>
+  add<T>(options: AddTaskOptions): ITask<T>
   readonly tasks: ITask<any>[]
   kill(PID: string): void
   on(event: TaskManagerEvent, callback: TaskManagerEventCallback): string

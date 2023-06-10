@@ -15,7 +15,7 @@ export class DriverManager implements IDriverManager {
     emitters: async () => {
       if (!this.#drivers.has('emitters')) {
         const { Emitters } = await import('./emitter')
-        this.#drivers.set('emitters', new Emitters())
+        this.#drivers.set('emitters', Emitters)
       }
       return this.#drivers.get('emitters')
     },
@@ -31,7 +31,8 @@ export class DriverManager implements IDriverManager {
         const { LocalNotifications } = await import('./notifications')
         const lnDriver = await this.getDriver('permissions')
         const eDriver = await this.getDriver('emitters')
-        this.#drivers.set('localNotifications', new LocalNotifications(lnDriver, eDriver))
+        const emitters = new eDriver()
+        this.#drivers.set('localNotifications', new LocalNotifications(lnDriver, emitters))
       }
       return this.#drivers.get('localNotifications')
     },
@@ -46,7 +47,8 @@ export class DriverManager implements IDriverManager {
       if (!this.#drivers.has('server')) {
         const { Server } = await import('./server')
         const cipher = await this.getDriver('cipher')
-        const emitters = await this.getDriver('emitters')
+        const eDriver = await this.getDriver('emitters')
+        const emitters = new eDriver()
         this.#drivers.set('server', new Server(emitters, cipher))
       }
       return this.#drivers.get('server')

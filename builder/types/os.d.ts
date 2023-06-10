@@ -1,16 +1,25 @@
 import { IKernel } from "./kernel"
 
-export type SplashScreenResult = string | HTMLElement
-export interface ISplashScreen {
-  render(): SplashScreenResult | Promise<SplashScreenResult>
+export declare class WindowComponent extends HTMLElement {
+  icon: string
+  isDraggable: boolean
+  isResize: boolean
+  minimize: boolean
+  width: number
+  minWidth: number
+  maxWidth: number
+  height: number
+  minHeight: number
+  maxHeight: number
+  autoFullScreen: boolean
+  readonly isFocus: boolean
+  onMount?(): void | Promise<void>
+  onClose?(): void | Promise<void>
 }
-export interface ISplashScreenClass {
-  new(): ISplashScreen
-}
-export interface IOS {
-  SplashScreen: ISplashScreen
-  run(): Promise<void>
-}
-export interface IOS {
-  new(kernel: IKernel): IOS
+export interface IManifest {
+  packageName: string
+  title: string
+  description?: string
+  author?: string[]
+  icon?: string
 }

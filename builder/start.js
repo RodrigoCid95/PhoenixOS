@@ -19,16 +19,15 @@ const getOpts = (entryPoints, outdir) => ({
 module.exports = async ({ input, output, manifest }) => {
   const ctxList = []
   if (manifest) {
-    const packageName = path.basename(input)
+    const manifestFilePath = path.join(input, 'manifest.json')
+    const manifestData = JSON.parse(fs.readFileSync(manifestFilePath, { encoding: 'utf8' }) || '{}')
+    const { packageName, services } = manifestData
     if (!/^[a-zA-Z]+(\.[a-zA-Z]+)*$/.test(packageName)) {
       console.log('El nómbre del paquete no es válido!')
       return
     }
-    const manifestFilePath = path.join(input, 'manifest.json')
-    const manifestData = JSON.parse(fs.readFileSync(manifestFilePath, { encoding: 'utf8' }) || '{}')
     const mainAppPath = path.join(input, 'main.ts')
     ctxList.push(context(getOpts([mainAppPath], output)))
-    const { services } = manifestData
     if (services) {
       const serviceNames = Object.keys(services)
       for (const nameService of serviceNames) {

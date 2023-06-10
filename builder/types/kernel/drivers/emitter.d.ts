@@ -10,3 +10,6 @@ export interface IEmitters {
 	emmit<T = undefined>(event: string, args?: T): void
 	createEmitter(): IEmitter
 }
+export interface ClassEmitters {
+	new(): IEmitters
+}

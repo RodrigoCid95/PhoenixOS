@@ -1,4 +1,4 @@
-import { IDriverManager, IKernel, ITaskManager, IOS } from 'phoenix-builder'
+import { ControllerClass, DefineWebComponentOptions, IController, IDriverManager, IKernel, ITaskManager } from 'phoenix-builder'
 import { TaskManager } from 'clasess/task-manager'
 import { DriverManager } from 'drivers'
 
@@ -12,11 +12,69 @@ export class Kernel implements IKernel {
     return this.#DriverManager
   }
   async run(): Promise<void> {
-    const Emmiters = await this.#DriverManager.getDriver('emitters')
-    this.#TaskManager.setEmitterDriver(Emmiters)
+    const eDriver = await this.#DriverManager.getDriver('emitters')
+    const emmiters = new eDriver()
+    this.#TaskManager.setEmitterDriver(emmiters)
     const { main } = await fetch('/js/os.json').then(res => res.json())
     const osPath = `/js/${main}`
     const { default: OS } = await import(osPath)
     new OS(this)
   }
+  defineWebComponent({ tagName, Controller, getService, args }: DefineWebComponentOptions): void {
+    if (!customElements.get(tagName)) {
+      let C: any = Controller
+      customElements.define(tagName, class extends HTMLElement {
+        #instanceController!: IController
+        async connectedCallback(): Promise<void> {
+          try {
+            C.prototype.constructor.arguments
+            C = await C()
+          } catch (error) {
+          }
+          this.#instanceController = new C(...args || [])
+          this.#instanceController.element = this
+          if (C.shadow || C.shadowTemplate) {
+            this.attachShadow({ mode: 'open' })
+          }
+          if (C.shadowTemplate && this.shadowRoot) {
+            this.shadowRoot.innerHTML = C.shadowTemplate
+          }
+          if (C.innerTemplate) {
+            this.innerHTML = C.innerTemplate
+          }
+          if (C.styles) {
+            if (this.shadowRoot) {
+              for (const styleSheet of C.styles) {
+                this.shadowRoot.adoptedStyleSheets.push(styleSheet)
+              }
+            } else {
+              const styles = []
+              for (const { cssRules } of C.styles) {
+                let css: string[] = []
+                for (let index = 0; index < cssRules.length; index++) {
+                  const rule = cssRules.item(index)
+                  css.push(rule?.cssText || '')
+                }
+                styles.push(css.join('\n'))
+              }
+              const stylesElement = document.createElement('style')
+              stylesElement.innerHTML = styles.join('\n')
+              this.insertAdjacentElement('afterbegin', stylesElement)
+            }
+          }
+          this.#instanceController.getService = getService
+          if (this.#instanceController.onMount) {
+            this.#instanceController.onMount()
+          }
+        }
+        disconnectedCallback(): void {
+          if (this.#instanceController && this.#instanceController.onClose) {
+            this.#instanceController.onClose()
+          }
+        }
+      })
+    }
+  }
 }
+
+customElements.define
