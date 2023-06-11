@@ -1,11 +1,13 @@
 import { AppModule } from 'phoenix-builder'
 import Index from './views/index'
+import AppPageThree from 'views/view-three'
 
 const appModule: AppModule<'at'> = {
   Views: {
     Index,
     others: {
-      'at-two': () => import('views/view1')
+      'at-page-two': () => import('views/view-two'),
+      'at-page-three': AppPageThree
     }
   }
 }

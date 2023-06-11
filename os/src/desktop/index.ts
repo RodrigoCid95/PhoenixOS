@@ -1,11 +1,11 @@
-import { IController, IEmitters, IManifest, ITask, IWindow, WindowComponent } from "phoenix-builder"
+import { IEmitters, IManifest, ITask, IWindow, WindowComponent } from "phoenix-builder"
 import _styles from './style.scss'
 import _template from './template.html'
 
 export default (emmiters: IEmitters) => {
 	emmiters.emmit('define-components', {
 		tagName: 'app-desktop',
-		Controller: class implements IController {
+		Controller: class extends window.Controller {
 			static innerTemplate = _template
 			static styles: CSSStyleSheet[] = [_styles]
 			element!: HTMLElement

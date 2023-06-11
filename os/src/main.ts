@@ -1,8 +1,8 @@
-import { AppModule, ControllerClass, IController, IEmitters, IKernel, IManifest, IService, IndexControllerClass, WindowComponent } from 'phoenix-builder'
+import { AppModule, ControllerClass, ControllerClassConstructable, IEmitters, IKernel, IManifest, IService, IndexControllerClass, IndexControllerClassConstructable, OtherViews, WindowComponent } from 'phoenix-builder'
 import _spStyles from 'splash-screen/styles.scss'
 import _spTemplate from 'splash-screen/template.html'
 
-class AppSplashScreen implements IController {
+class AppSplashScreen extends window.Controller {
   static styles = [_spStyles]
   static shadowTemplate = _spTemplate
   static shadow = true
@@ -11,7 +11,6 @@ class AppSplashScreen implements IController {
 export default class {
   #emitters!: IEmitters
   constructor(private kernel: IKernel) {
-    (window as any).tm = this.kernel.TaskManager
     this.#init()
   }
   #getService<S = IService>(serviceName: string): S {
@@ -45,7 +44,7 @@ export default class {
   async #prepareEmitter(): Promise<IEmitters> {
     const eDriver = await this.kernel.DriverManager.getDriver('emitters')
     const emitters = new eDriver()
-    emitters.on('define-components', ({ tagName, Controller, args }: { tagName: string, Controller: ControllerClass, args: string[] }) => this.kernel.defineWebComponent({ tagName, Controller, args, getService: this.#getService.bind(this) }))
+    emitters.on('define-components', ({ tagName, Controller, args }: { tagName: string, Controller: ControllerClassConstructable, args: string[] }) => this.kernel.defineWebComponent({ tagName, Controller, args, getService: this.#getService.bind(this) }))
     emitters.on('launch', this.#launch.bind(this))
     return emitters
   }
@@ -62,15 +61,8 @@ export default class {
     this.#showSplashScreen()
     this.#loadDesktop()
   }
-  async #defineWindow(
-    { tag, Controller, useNav, args }: {
-      tag: string
-      Controller: IndexControllerClass
-      useNav: boolean,
-      args: string[]
-    }
-  ) {
-    const tagName = useNav ? tag : Controller.tag
+  async #defineWindow({ tag, Controller, useNav, args }: DefineWindowOptions ) {
+    const tagName = useNav ? tag : (Controller as any).tag || ''
     const getService = this.#getService.bind(this)
     if (!window.customElements.get(tagName)) {
       if (useNav) {
@@ -117,9 +109,9 @@ export default class {
       args
     })
     if (others) {
-      const tags: any[] = Object.keys(others)
+      const tags: Array<keyof OtherViews<string>> = Object.keys(others) as any
       for (const tagName of tags) {
-        const Controller = tags[tagName]
+        const Controller = others[tagName]
         this.kernel.defineWebComponent({
           tagName,
           Controller,
@@ -137,4 +129,11 @@ export default class {
     app.addEventListener('onClose', () => newTask.kill())
     this.#emitters.emmit('add-app', newTask)
   }
+}
+
+type DefineWindowOptions = {
+  tag: string
+  Controller: IndexControllerClassConstructable
+  useNav: boolean
+  args: string[]
 }

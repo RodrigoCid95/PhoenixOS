@@ -1,4 +1,4 @@
-import { ControllerClass, DefineWebComponentOptions, IController, IDriverManager, IKernel, ITaskManager } from 'phoenix-builder'
+import { ControllerClass, DefineWebComponentOptions, IDriverManager, IKernel, ITaskManager } from 'phoenix-builder'
 import { TaskManager } from 'clasess/task-manager'
 import { DriverManager } from 'drivers'
 
@@ -24,14 +24,14 @@ export class Kernel implements IKernel {
     if (!customElements.get(tagName)) {
       let C: any = Controller
       customElements.define(tagName, class extends HTMLElement {
-        #instanceController!: IController
+        #instanceController!: ControllerClass
         async connectedCallback(): Promise<void> {
-          try {
-            C.prototype.constructor.arguments
-            C = await C()
-          } catch (error) {
+          if (C.isController) {
+            this.#instanceController = new C(...args || [])
+          } else {
+            C = (await C()).default
+            this.#instanceController = new C(...args || [])
           }
-          this.#instanceController = new C(...args || [])
           this.#instanceController.element = this
           if (C.shadow || C.shadowTemplate) {
             this.attachShadow({ mode: 'open' })
@@ -77,4 +77,13 @@ export class Kernel implements IKernel {
   }
 }
 
-customElements.define
+class IndexController {
+  static isController: boolean
+}
+IndexController.isController = true;
+class Controller {
+  static isController: boolean
+}
+Controller.isController = true;
+(window as any).IndexController = IndexController;
+(window as any).Controller = Controller
