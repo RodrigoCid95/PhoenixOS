@@ -4,7 +4,5 @@
   "description": "App fake de pruebas.",
   "author": [
     "Rodrigo Cid"
-  ],
-  "tag": "app-one",
-  "type": "app"
+  ]
 }

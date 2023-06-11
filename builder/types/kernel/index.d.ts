@@ -12,6 +12,7 @@ export type GetService = <S = IService>(serviceNAme: string) => S
 export declare class ViewControllerClass {
   static styles: CSSStyleSheet[]
   static template: string
+  static shadow: boolean
   readonly viewElement: HTMLElement
   readonly windowElement: WindowComponent
   getService: GetService
@@ -19,7 +20,7 @@ export declare class ViewControllerClass {
   onClose(): void | Promise<void>
 }
 export interface ViewControllerConstructable {
-  new(...args: string[]): ViewControllerClass
+  new(): ViewControllerClass
 }
 export interface IDriver<T> {
   new(kernel: IKernel): T
@@ -27,8 +28,8 @@ export interface IDriver<T> {
 export type DefineWebComponentOptions = {
   tagName: string
   Controller: ControllerClassConstructable | IndexControllerClassConstructable | LoadView
-  getService: GetService
-  args?: string[]
+  prepareInstace?: (definition: ViewControllerClass) => ViewControllerClass
+  shadowTemplate?: string
 }
 export interface IKernel {
   readonly TaskManager: ITaskManager

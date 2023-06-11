@@ -1,10 +1,11 @@
-import { ViewControllerClass, DefineWebComponentOptions, IDriverManager, IKernel, ITaskManager } from 'phoenix-builder'
+import { ViewControllerClass, DefineWebComponentOptions, IDriverManager, IKernel, ITaskManager, ViewControllerConstructable } from 'phoenix-builder'
 import { TaskManager } from 'clasess/task-manager'
 import { DriverManager } from 'drivers'
 
 class Kernel implements IKernel {
   #TaskManager: TaskManager = new TaskManager()
   #DriverManager: DriverManager = new DriverManager()
+  #viewControllers: Map<string, ViewControllerConstructable>
   get TaskManager(): ITaskManager {
     return this.#TaskManager
   }
@@ -12,6 +13,7 @@ class Kernel implements IKernel {
     return this.#DriverManager
   }
   constructor() {
+    this.#viewControllers = new Map()
     this.run()
   }
   async run(): Promise<void> {
@@ -23,32 +25,40 @@ class Kernel implements IKernel {
     const { default: OS } = await import(osPath)
     new OS(this)
   }
-  defineWebComponent({ tagName, Controller, getService, args }: DefineWebComponentOptions): void {
+  defineWebComponent({ tagName, Controller, prepareInstace, shadowTemplate = '<slot></slot>' }: DefineWebComponentOptions): void {
+    const viewControllers = this.#viewControllers
     if (!customElements.get(tagName)) {
       let C: any = Controller
       customElements.define(tagName, class extends HTMLElement {
         #instanceController!: ViewControllerClass
         async connectedCallback(): Promise<void> {
-          if (C.isController) {
-            this.#instanceController = new C(...args || [])
+          if (viewControllers.has(tagName)) {
+            C = viewControllers.get(tagName)
           } else {
-            C = (await C()).default
-            this.#instanceController = new C(...args || [])
+            if (!C.isController) {
+              C = (await C()).default
+            }
+            viewControllers.set(tagName, C)
+          }
+          if (C.shadow) {
+            this.attachShadow({ mode: 'open' })
+          }
+          if (this.shadowRoot) {
+            this.shadowRoot.innerHTML = shadowTemplate
+          }
+          if (prepareInstace) {
+            this.#instanceController = prepareInstace(new C())
+          } else {
+            this.#instanceController = new C()
           }
           const _this = this
-          Object.defineProperty(C.prototype, 'viewElement', {
+          Object.defineProperty(this.#instanceController, 'viewElement', {
             get() {
               return _this
             }
           })
-          if (C.shadow || C.shadowTemplate) {
-            this.attachShadow({ mode: 'open' })
-          }
-          if (C.shadowTemplate && this.shadowRoot) {
-            this.shadowRoot.innerHTML = C.shadowTemplate
-          }
-          if (C.innerTemplate) {
-            this.innerHTML = C.innerTemplate
+          if (C.template) {
+            this.innerHTML = C.template
           }
           if (C.styles) {
             if (this.shadowRoot) {
@@ -70,13 +80,12 @@ class Kernel implements IKernel {
               this.insertAdjacentElement('afterbegin', stylesElement)
             }
           }
-          this.#instanceController.getService = getService
           if (this.#instanceController.onMount) {
             this.#instanceController.onMount()
           }
         }
         disconnectedCallback(): void {
-          if (this.#instanceController && this.#instanceController.onClose) {
+          if (this.#instanceController.onClose) {
             this.#instanceController.onClose()
           }
         }
@@ -84,16 +93,21 @@ class Kernel implements IKernel {
     }
   }
 }
-
-class IndexController {
+class ViewController {
   static isController: boolean
+  static template: string
+  static shadow: boolean
 }
-IndexController.isController = true;
-class Controller {
-  static isController: boolean
-}
-Controller.isController = true;
-(window as any).IndexController = IndexController;
-(window as any).Controller = Controller
-
+Object.defineProperty(ViewController, 'isController', {
+  get() {
+    return true
+  }
+})
+Object.defineProperty(ViewController, 'template', { value: '', writable: true })
+Object.defineProperty(ViewController, 'shadow', { value: true, writable: true })
+Object.defineProperty(window, 'ViewController', {
+  get() {
+    return ViewController
+  }
+})
 new Kernel()

@@ -1,11 +1,10 @@
-import { AppModule, IEmitters, IKernel, IManifest, IService, OtherViews, WindowComponent } from 'phoenix-builder'
+import { AppModule, IEmitters, IKernel, IManifest, IService, OtherViews, ViewControllerConstructable, WindowComponent } from 'phoenix-builder'
 import _spStyles from 'splash-screen/styles.scss'
 import _spTemplate from 'splash-screen/template.html'
 
-class AppSplashScreen extends window.Controller {
+class AppSplashScreen extends window.ViewController {
   static styles = [_spStyles]
   static shadowTemplate = _spTemplate
-  static shadow = true
 }
 
 export default class {
@@ -21,7 +20,7 @@ export default class {
     this.kernel.defineWebComponent({
       tagName: 'splash-screen',
       Controller: AppSplashScreen,
-      getService: this.#getService.bind(this)
+      shadowTemplate: AppSplashScreen.shadowTemplate
     })
     document.body.innerHTML = '<splash-screen></splash-screen>'
   }
@@ -33,8 +32,7 @@ export default class {
     const { default: AppLoginController } = await import('login')
     this.kernel.defineWebComponent({
       tagName: 'app-login',
-      Controller: AppLoginController,
-      getService: this.#getService.bind(this)
+      Controller: AppLoginController
     })
     const appLogin = document.createElement('app-login')
     document.body.innerHTML = ''
@@ -44,14 +42,23 @@ export default class {
   async #prepareEmitter(): Promise<IEmitters> {
     const eDriver = await this.kernel.DriverManager.getDriver('emitters')
     const emitters = new eDriver()
-    emitters.on('define-components', ({ tagName, Controller, args }: { tagName: string, Controller: ControllerClassConstructable, args: string[] }) => this.kernel.defineWebComponent({ tagName, Controller, args, getService: this.#getService.bind(this) }))
+    emitters.on('define-components', ({ tagName, Controller }: { tagName: string, Controller: ViewControllerConstructable }) => this.kernel.defineWebComponent({ tagName, Controller }))
     emitters.on('launch', this.#launch.bind(this))
     return emitters
   }
   async #loadDesktop(): Promise<void> {
-    this.#emitters = await this.#prepareEmitter()
-    const { default: initDesktop } = await import('desktop')
-    initDesktop(this.#emitters)
+    const emitters = await this.#prepareEmitter()
+    const { default: AppDesktopController } = await import('desktop')
+    Object.defineProperty(AppDesktopController.prototype, 'emitters', {
+      get() {
+        return emitters
+      }
+    })
+    this.kernel.defineWebComponent({
+      tagName: 'app-desktop',
+      Controller: AppDesktopController
+    })
+    this.#emitters = emitters
     document.body.innerHTML = '<app-desktop></app-desktop>'
   }
   async #init() {
@@ -61,66 +68,51 @@ export default class {
     this.#showSplashScreen()
     this.#loadDesktop()
   }
-  async #defineWindow({ tag, Controller, useNav, args }: DefineWindowOptions ) {
-    const tagName = useNav ? tag : (Controller as any).tag || tag
-    const getService = this.#getService.bind(this)
+  async #launch({ packageName, title, description, icon }: IManifest, args: string[] = []): Promise<void> {
+    const { default: { prefix, Views: { Index, others = {} } } }: PackageModule = await import(`/js/apps/${packageName}/main.js`)
+    const tagName = packageName.toLowerCase().split('.').join('-')
     if (!window.customElements.get(tagName)) {
-      if (useNav) {
-        this.kernel.defineWebComponent({
-          tagName: Controller.tag,
-          Controller,
-          getService: this.#getService.bind(this)
-        })
-      }
       const { WindowComponent } = await import('./window')
+      const { kernel } = this
+      const getService = this.#getService.bind(this)
       window.customElements.define(tagName, class extends WindowComponent {
-        onMount = () => {
-          this.innerHTML = useNav ? `<ion-nav root="${Controller.tag}"></ion-nav>` : Controller.innerTemplate || ''
-          if (!useNav) {
-            if (Controller.shadowTemplate && this.shadowRoot) {
-              this.shadowRoot.innerHTML = Controller.shadowTemplate
+        onMount = async () => {
+          const indexTagName = `${prefix}-view-index`
+          const windowInstance = this
+          kernel.defineWebComponent({
+            tagName: indexTagName,
+            Controller: Index,
+            prepareInstace(instance) {
+              Object.defineProperty(instance, 'windowElement', {
+                get() {
+                  return windowInstance
+                }
+              })
+              return instance
             }
-            if (Controller.styles && this.shadowRoot) {
-              for (const styleSheet of Controller.styles) {
-                this.shadowRoot.adoptedStyleSheets.push(styleSheet)
-              }
-            }
-            const instance = new Controller(...args)
-            instance.element = this
-            instance.getService = getService
-            if (instance.onMount) {
-              instance.onMount()
-            }
-            if (instance.onClose) {
-              this.onClose = instance.onClose.bind(instance)
+          })
+          this.innerHTML = `<ion-nav root="${indexTagName}"></ion-nav>`
+          if (others) {
+            const viewNames: Lowercase<string>[] = Object.keys(others) as any
+            for (const viewName of viewNames) {
+              kernel.defineWebComponent({
+                tagName: `${prefix}-page-${viewName}`,
+                Controller: others[viewName],
+                prepareInstace(instance) {
+                  Object.defineProperty(instance, 'windowElement', {
+                    get() {
+                      return windowInstance
+                    }
+                  })
+                  return instance
+                }
+              })
             }
           }
         }
       })
     }
-  }
-  async #launch({ packageName, title, description, icon }: IManifest, args: string[] = []): Promise<void> {
-    const { default: { Views: { Index, others = {} } } }: { default: AppModule } = await import(`/js/apps/${packageName}/main.js`)
-    const useNav = Object.keys(others).length > 0
-    packageName = packageName.toLowerCase().split('.').join('-')
-    await this.#defineWindow({
-      tag: packageName,
-      Controller: Index,
-      useNav,
-      args
-    })
-    if (others) {
-      const tags: Lowercase<string>[] = Object.keys(others) as any
-      for (const tagName of tags) {
-        const Controller = others[tagName]
-        this.kernel.defineWebComponent({
-          tagName,
-          Controller,
-          getService: this.#getService.bind(this)
-        })
-      }
-    }
-    const app = document.createElement(useNav ? packageName : (Index as any).tag || packageName)
+    const app = document.createElement(tagName)
     const newTask = this.kernel.TaskManager.add<WindowComponent>({
       title,
       description: description || '',
@@ -132,9 +124,12 @@ export default class {
   }
 }
 
+type PackageModule = {
+  default: AppModule
+}
 type DefineWindowOptions = {
   tag: string
-  Controller: IndexControllerClassConstructable
+  Controller: ViewControllerConstructable
   useNav: boolean
   args: string[]
 }

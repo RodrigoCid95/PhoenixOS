@@ -1,11 +1,10 @@
 import _template from './template.html'
 
-export default class AppLoginController extends window.Controller {
-  static innerTemplate = _template
-  element!: HTMLElement
+export default class AppLoginController extends window.ViewController {
+  static template = _template
   onMount() {
-    this.element.querySelector('#enter')?.addEventListener('click', () => {
-      this.element.dispatchEvent(new CustomEvent('onAuth'))
+    this.viewElement.querySelector('#enter')?.addEventListener('click', () => {
+      this.viewElement.dispatchEvent(new CustomEvent('onAuth'))
     })
   }
 }
