@@ -1,4 +1,4 @@
-import { AppModule, ControllerClass, ControllerClassConstructable, IEmitters, IKernel, IManifest, IService, IndexControllerClass, IndexControllerClassConstructable, OtherViews, WindowComponent } from 'phoenix-builder'
+import { AppModule, IEmitters, IKernel, IManifest, IService, OtherViews, WindowComponent } from 'phoenix-builder'
 import _spStyles from 'splash-screen/styles.scss'
 import _spTemplate from 'splash-screen/template.html'
 
@@ -62,7 +62,7 @@ export default class {
     this.#loadDesktop()
   }
   async #defineWindow({ tag, Controller, useNav, args }: DefineWindowOptions ) {
-    const tagName = useNav ? tag : (Controller as any).tag || ''
+    const tagName = useNav ? tag : (Controller as any).tag || tag
     const getService = this.#getService.bind(this)
     if (!window.customElements.get(tagName)) {
       if (useNav) {
@@ -101,15 +101,16 @@ export default class {
   }
   async #launch({ packageName, title, description, icon }: IManifest, args: string[] = []): Promise<void> {
     const { default: { Views: { Index, others = {} } } }: { default: AppModule } = await import(`/js/apps/${packageName}/main.js`)
+    const useNav = Object.keys(others).length > 0
     packageName = packageName.toLowerCase().split('.').join('-')
     await this.#defineWindow({
       tag: packageName,
       Controller: Index,
-      useNav: Object.keys(others).length > 0,
+      useNav,
       args
     })
     if (others) {
-      const tags: Array<keyof OtherViews<string>> = Object.keys(others) as any
+      const tags: Lowercase<string>[] = Object.keys(others) as any
       for (const tagName of tags) {
         const Controller = others[tagName]
         this.kernel.defineWebComponent({
@@ -119,7 +120,7 @@ export default class {
         })
       }
     }
-    const app = document.createElement(packageName)
+    const app = document.createElement(useNav ? packageName : (Index as any).tag || packageName)
     const newTask = this.kernel.TaskManager.add<WindowComponent>({
       title,
       description: description || '',

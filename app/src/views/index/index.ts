@@ -1,11 +1,8 @@
 import { WindowComponent } from 'phoenix-builder'
 import template from './template.html'
 
-export default class AppOne extends window.IndexController {
-  static shadow = true
-  static innerTemplate = template
-  static shadowTemplate = '<slot></slot>'
-  static tag: string = 'at-one'
+export default class AppOne extends window.ViewController {
+  static template = template
   element!: WindowComponent
   constructor(...args: string[]) {
     super()

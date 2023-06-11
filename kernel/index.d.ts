@@ -1,8 +1,7 @@
-import { ControllerClass, IndexControllerClass } from 'phoenix-builder'
+import { ViewControllerClass } from 'phoenix-builder'
 
 declare global {
   interface Window {
-    IndexController: IndexControllerClass
-    Controller: ControllerClass
+    ViewController: ViewControllerClass
   }
 }
