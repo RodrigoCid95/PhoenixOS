@@ -1,4 +1,4 @@
-import { IKernel } from "./kernel"
+import { IKernel, IDriverList } from "./kernel"
 
 export declare class WindowComponent extends HTMLElement {
   icon: string
@@ -22,4 +22,5 @@ export interface IManifest {
   description?: string
   author?: string[]
   icon?: string
+  dependences?: Array<keyof IDriverList>
 }

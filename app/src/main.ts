@@ -10,6 +10,9 @@ const appModule: AppModule = {
       'two': () => import('views/view-two'),
       'three': AppPageThree
     }
+  },
+  Services: {
+    IndexService: () => import('services')
   }
 }
 

@@ -1,4 +1,4 @@
-import { AppModule, IEmitters, IKernel, IManifest, IService, OtherViews, ViewControllerConstructable, WindowComponent } from 'phoenix-builder'
+import { AppModule, IDriverList, IEmitters, IKernel, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent } from 'phoenix-builder'
 import _spStyles from 'splash-screen/styles.scss'
 import _spTemplate from 'splash-screen/template.html'
 
@@ -11,10 +11,6 @@ export default class {
   #emitters!: IEmitters
   constructor(private kernel: IKernel) {
     this.#init()
-  }
-  #getService<S = IService>(serviceName: string): S {
-    console.log(serviceName)
-    throw new Error('Function not implemented.')
   }
   #showSplashScreen(): void {
     this.kernel.defineWebComponent({
@@ -68,13 +64,46 @@ export default class {
     this.#showSplashScreen()
     this.#loadDesktop()
   }
-  async #launch({ packageName, title, description, icon }: IManifest, args: string[] = []): Promise<void> {
-    const { default: { prefix, Views: { Index, others = {} } } }: PackageModule = await import(`/js/apps/${packageName}/main.js`)
+  async #launch({ packageName, title, description, icon, dependences = [] }: IManifest): Promise<void> {
+    const { default: { prefix, Views: { Index, others = {} }, Services = {} } }: PackageModule = await import(`/js/apps/${packageName}/main.js`)
     const tagName = packageName.toLowerCase().split('.').join('-')
     if (!window.customElements.get(tagName)) {
-      const { WindowComponent } = await import('./window')
       const { kernel } = this
-      const getService = this.#getService.bind(this)
+      const services = new Map<string, ServiceClass>()
+      const servicesDeclarations = new Map<string, ServiceClass>()
+      const nameServices = Object.keys(Services)
+      const getDriver = async (name: keyof IDriverList) => {
+        if (!dependences.includes(name)) {
+          throw new DriverPermissionDenied(name)
+        }
+        return await this.kernel.DriverManager.getDriver(name)
+      }
+      const getService = async (name: string) => {
+        if (nameServices.length === 0) {
+          throw new WithOutServices()
+        }
+        if (!nameServices.includes(name)) {
+          throw new ServiceNotExist(name)
+        }
+        if (!services.has(name)) {
+          if (!servicesDeclarations.has(name)) {
+            let sd = Services[name]
+            if (!sd.isService) {
+              sd = (await sd()).default
+            }
+            Object.defineProperty(sd.prototype, 'getDriver', {
+              get() {
+                return getDriver
+              }
+            })
+            servicesDeclarations.set(name, sd)
+          }
+          const SD: any = servicesDeclarations.get(name)
+          services.set(name, new SD())
+        }
+        return services.get(name)
+      }
+      const { WindowComponent } = await import('./window')
       window.customElements.define(tagName, class extends WindowComponent {
         onMount = async () => {
           const indexTagName = `${prefix}-view-index`
@@ -86,6 +115,11 @@ export default class {
               Object.defineProperty(instance, 'windowElement', {
                 get() {
                   return windowInstance
+                }
+              })
+              Object.defineProperty(instance, 'getService', {
+                get() {
+                  return getService
                 }
               })
               return instance
@@ -102,6 +136,11 @@ export default class {
                   Object.defineProperty(instance, 'windowElement', {
                     get() {
                       return windowInstance
+                    }
+                  })
+                  Object.defineProperty(instance, 'getService', {
+                    get() {
+                      return getService
                     }
                   })
                   return instance
@@ -124,12 +163,36 @@ export default class {
   }
 }
 
+class ServiceNotExist extends Error {
+  constructor(nameService: string) {
+    super(`El servicio "${nameService}" no existe!`)
+    this.name = 'ServiceNotExist'
+  }
+}
+
+class WithOutServices extends Error {
+  constructor() {
+    super('No se definieron dependencias!')
+    this.name = 'WithOutServices'
+  }
+}
+
+class DriverPermissionDenied extends Error {
+  constructor(name: string) {
+    super(`No tienes permiso para usar el driver "${name}"`)
+    this.name = 'DriverPermissionDenied'
+  }
+}
+
+class Service {
+  static isService: boolean
+}
+Object.defineProperty(window, 'Service', {
+  get() {
+    return Service
+  }
+})
+
 type PackageModule = {
   default: AppModule
-}
-type DefineWindowOptions = {
-  tag: string
-  Controller: ViewControllerConstructable
-  useNav: boolean
-  args: string[]
 }

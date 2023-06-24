@@ -25,7 +25,7 @@ class Kernel implements IKernel {
     const { default: OS } = await import(osPath)
     new OS(this)
   }
-  defineWebComponent({ tagName, Controller, prepareInstace, shadowTemplate = '<slot></slot>' }: DefineWebComponentOptions): void {
+  defineWebComponent({ tagName, Controller, prepareControllerClass, prepareInstace, shadowTemplate = '<slot></slot>' }: DefineWebComponentOptions): void {
     const viewControllers = this.#viewControllers
     if (!customElements.get(tagName)) {
       let C: any = Controller
@@ -39,6 +39,9 @@ class Kernel implements IKernel {
               C = (await C()).default
             }
             viewControllers.set(tagName, C)
+            if (prepareControllerClass) {
+              C = prepareControllerClass(C)
+            }
           }
           if (C.shadow) {
             this.attachShadow({ mode: 'open' })

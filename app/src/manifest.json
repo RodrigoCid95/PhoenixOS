@@ -4,5 +4,6 @@
   "description": "App fake de pruebas.",
   "author": [
     "Rodrigo Cid"
-  ]
+  ],
+  "dependences": ["geolocation"]
 }
