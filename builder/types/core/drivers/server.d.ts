@@ -1,18 +1,29 @@
-export interface IMethods {
-  GET: 'GET'
-  POST: 'POST'
-  PUT: 'PUT'
-  DELETE: 'DELETE'
-}
+import { ICipher } from "./cipher"
+
 export type SendArguments = {
   path: string
-  method: IMethods[keyof IMethods]
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   data?: any
-  encryptRequest?: boolean
-  decryptResponse?: boolean
+  headers?: { [x: string]: string }
 }
 export type Callback<T> = (response: T) => void | Promise<void>
-export interface IServerConnector {
+export type UploadArgs = {
+  file: File
+  progress?: (porcent: number) => void | Promise<void>
+  error?: () => void | Promise<void>
+}
+export interface IHeaders {
+  [x: string]: string
+}
+export interface IAPIConnector {
+  setHeaders(headers?: IHeaders): void
+  create<T>(data: T): Promise<void>
+  read<T>(query: Partial<T>): Promise<T[]>
+  update<T>(query: Partial<T>, data: Partial<T>): Promise<void>
+  delete<T>(query: Partial<T>): Promise<void>
+  upload(uploadArgs: UploadArgs): void
+}
+export interface IWebSocketsConnector {
   connect(url: string): void
   disconnect(): void
   onConnect(callback: () => void | Promise<void>): string
@@ -21,8 +32,15 @@ export interface IServerConnector {
   on<T = {}>(event: string, callback: Callback<T>): Promise<void>
   off(event: 'connect' | 'disconnect', uuid: string): void
   off(event: string, listener: any): void
-  send<T = void>(args: SendArguments): Promise<T>
   emit<T = void>(event: string, data?: object): Promise<T>
+}
+export type CreateAPIConnectorOpts = {
+  path: string
+  host?: string
+}
+export interface IServerConnector {
+  createRealTimeConnector(host?: string): Promise<IWebSocketsConnector>
+  createAPIConnector(opts: CreateAPIConnectorOpts, cipher?: ICipher): Promise<IAPIConnector>
 }
 export type Response<T> = {
   data: T

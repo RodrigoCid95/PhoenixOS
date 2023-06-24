@@ -1,11 +1,13 @@
-import { Callback, ICipher, IEmitter, IEmitters, IServerConnector, SendArguments } from 'phoenix-builder'
+import { Callback, IEmitter, IEmitters, IWebSocketsConnector, SendArguments } from 'phoenix-builder'
 import { io, Socket } from 'socket.io-client'
 
-export class Server implements IServerConnector {
-  #socket: Socket = io({ transports: ['websocket'], autoConnect: false })
+export class WebScoketsConnector implements IWebSocketsConnector {
+  #socket: Socket
   #connectEmitter: IEmitter = this.emitters.createEmitter()
   #disconnectEmitter: IEmitter = this.emitters.createEmitter()
-  constructor(private emitters: IEmitters, private cipher: ICipher) {
+  constructor(private emitters: IEmitters, private host?: string) {
+    const ioOpts = { transports: ['websocket'], autoConnect: false }
+    this.#socket = this.host ? io(this.host, ioOpts) : io(ioOpts)
     this.#socket.on('connect', () => this.#connectEmitter.emmit())
     this.#socket.on('disconnect', () => this.#disconnectEmitter.emmit())
   }
@@ -47,8 +49,6 @@ export class Server implements IServerConnector {
     throw new Error('Method not implemented.');
   }
   emit<T = void>(event: string, data?: object | undefined): Promise<T> {
-    return new Promise(resolve => {
-      this.#socket.emit(event, data, resolve)
-    })
+    return new Promise(resolve => this.#socket.emit(event, data, resolve))
   }
 }

@@ -58,6 +58,7 @@ export default class {
     document.body.innerHTML = '<app-desktop></app-desktop>'
   }
   async #init() {
+    (window as any).c = await this.core.DriverManager.getDriver('cipher')
     this.#showSplashScreen()
     await this.#loadUI()
     await this.#loadLogin()

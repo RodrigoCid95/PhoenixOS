@@ -3,20 +3,24 @@ import { ICipher } from 'phoenix-builder'
 export class Cipher implements ICipher {
   #encoder = new TextEncoder()
   #decoder = new TextDecoder()
-  #generateKey(key: string) {
+  generateKey(key?: string) {
+    if (!key) {
+      key = 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function (c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16)
+      })
+    }
     return crypto.subtle.importKey('raw', this.#encoder.encode(key.slice(0, 16)), { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])
   }
   async isEnable(): Promise<boolean> {
     return window.crypto.subtle !== undefined
   }
-  async encrypt(key: string, data: string): Promise<string> {
+  async encrypt(key: CryptoKey | string, data: string): Promise<string> {
     if (!this.isEnable()) {
-      throw {
-        code: 'cipher-disabled',
-        message: 'No está disponible el cifrado!'
-      }
+      throw new CipherNotSupport()
     }
-    const newKey = await this.#generateKey(key)
+    const newKey = typeof key ===  'string' ? await this.generateKey(key) : key
     const iv = crypto.getRandomValues(new Uint8Array(12))
     const encrypted = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, newKey, this.#encoder.encode(data)))
     const combined = new Uint8Array(iv.length + encrypted.length)
@@ -28,14 +32,11 @@ export class Cipher implements ICipher {
     }
     return result
   }
-  async decrypt(key: string, strEncrypted: string): Promise<string> {
+  async decrypt(key: CryptoKey | string, strEncrypted: string): Promise<string> {
     if (!this.isEnable()) {
-      throw {
-        code: 'cipher-disabled',
-        message: 'No está disponible el cifrado!'
-      }
+      throw new CipherNotSupport()
     }
-    const newKey = await this.#generateKey(key)
+    const newKey = typeof key ===  'string' ? await this.generateKey(key) : key
     let uint8Array = new Uint8Array(strEncrypted.length / 2)
     for (let i = 0; i < strEncrypted.length; i += 2) {
       uint8Array[i / 2] = parseInt(strEncrypted.substr(i, 2), 16)
@@ -44,5 +45,12 @@ export class Cipher implements ICipher {
     const data = uint8Array.slice(12, uint8Array.length)
     const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, newKey, data)
     return this.#decoder.decode(decrypted)
+  }
+}
+
+export class CipherNotSupport extends Error {
+  constructor() {
+    super('No está disponible el cifrado!')
+    this.name = 'CipherNotSupport'
   }
 }

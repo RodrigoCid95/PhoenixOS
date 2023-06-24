@@ -11,6 +11,7 @@ export class DriverManager implements IDriverManager {
         const { Cipher } = await import('./cipher')
         this.#drivers.set('cipher', new Cipher())
       }
+      return this.#drivers.get('cipher')
     },
     emitters: async () => {
       if (!this.#drivers.has('emitters')) {
@@ -46,10 +47,9 @@ export class DriverManager implements IDriverManager {
     server: async () => {
       if (!this.#drivers.has('server')) {
         const { Server } = await import('./server')
-        const cipher = await this.getDriver('cipher')
         const eDriver = await this.getDriver('emitters')
         const emitters = new eDriver()
-        this.#drivers.set('server', new Server(emitters, cipher))
+        this.#drivers.set('server', new Server(emitters))
       }
       return this.#drivers.get('server')
     }

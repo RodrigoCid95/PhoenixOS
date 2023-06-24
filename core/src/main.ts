@@ -20,8 +20,7 @@ class Core implements ICore {
     const eDriver = await this.#DriverManager.getDriver('emitters')
     const emmiters = new eDriver()
     this.#TaskManager.setEmitterDriver(emmiters)
-    const { main } = await fetch('/js/os.json').then(res => res.json())
-    const osPath = `/js/${main}`
+    const osPath = '/js/os/main.js'
     const { default: OS } = await import(osPath)
     new OS(this)
   }
