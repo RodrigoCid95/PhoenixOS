@@ -12,7 +12,7 @@ export const config: Config = {
       type: 'dist',
       dir: 'dist',
       esmLoaderPath: 'loader',
-      copy: [{ src: '../dist/ionicui', dest: '../../../www/js/ionicui' }]
+      copy: [{ src: '../dist/ionicui', dest: '../../../www/public/js/ionicui' }]
     }
   ]
 }

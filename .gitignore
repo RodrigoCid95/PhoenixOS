@@ -14,4 +14,6 @@ ionic-ui/package-lock.json
 os/node_modules
 os/package-lock.json
 
-www/js
+www/node_modules
+www/package-lock.json
+www/public/js

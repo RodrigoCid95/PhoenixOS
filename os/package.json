@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "reinstall": "rm -R node_modules && rm -R package-lock.json && npm i",
-    "start": "pb start --input src --output ../www/js/os",
-    "build": "pb build --input src --output ../www/js/os"
+    "start": "pb start --input src --output ../www/public/js/os",
+    "build": "pb build --input src --output ../www/public/js/os"
   },
   "keywords": [],
   "author": "",

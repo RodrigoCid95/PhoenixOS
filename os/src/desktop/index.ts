@@ -30,7 +30,7 @@ export default class AppDesktopController extends window.ViewController {
 		this.#desktopRef = this.viewElement.querySelector('.desktop') as any
 		const loading = await window.loadingController.create({ message: 'Cargando...' })
 		loading.present()
-		const appList: IManifest[] = await fetch('/js/apps/apps.json').then(res => res.json())
+		const appList: IManifest[] = await fetch('/apps').then(res => res.json())
 		const listRef = this.#modalRef.querySelector('ion-content ion-list')
 		for (const manifest of appList) {
 			const ionItem = document.createElement('ion-item')
