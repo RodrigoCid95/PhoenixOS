@@ -1,4 +1,4 @@
-import { AppModule, IDriverList, IEmitters, IKernel, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent } from 'phoenix-builder'
+import { AppModule, IDriverList, IEmitters, ICore, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent } from 'phoenix-builder'
 import _spStyles from 'splash-screen/styles.scss'
 import _spTemplate from 'splash-screen/template.html'
 
@@ -9,11 +9,11 @@ class AppSplashScreen extends window.ViewController {
 
 export default class {
   #emitters!: IEmitters
-  constructor(private kernel: IKernel) {
+  constructor(private core: ICore) {
     this.#init()
   }
   #showSplashScreen(): void {
-    this.kernel.defineWebComponent({
+    this.core.defineWebComponent({
       tagName: 'splash-screen',
       Controller: AppSplashScreen,
       shadowTemplate: AppSplashScreen.shadowTemplate
@@ -26,7 +26,7 @@ export default class {
   }
   async #loadLogin(): Promise<void> {
     const { default: AppLoginController } = await import('login')
-    this.kernel.defineWebComponent({
+    this.core.defineWebComponent({
       tagName: 'app-login',
       Controller: AppLoginController
     })
@@ -36,9 +36,9 @@ export default class {
     await new Promise(resolve => appLogin.addEventListener('onAuth', resolve))
   }
   async #prepareEmitter(): Promise<IEmitters> {
-    const eDriver = await this.kernel.DriverManager.getDriver('emitters')
+    const eDriver = await this.core.DriverManager.getDriver('emitters')
     const emitters = new eDriver()
-    emitters.on('define-components', ({ tagName, Controller }: { tagName: string, Controller: ViewControllerConstructable }) => this.kernel.defineWebComponent({ tagName, Controller }))
+    emitters.on('define-components', ({ tagName, Controller }: { tagName: string, Controller: ViewControllerConstructable }) => this.core.defineWebComponent({ tagName, Controller }))
     emitters.on('launch', this.#launch.bind(this))
     return emitters
   }
@@ -50,7 +50,7 @@ export default class {
         return emitters
       }
     })
-    this.kernel.defineWebComponent({
+    this.core.defineWebComponent({
       tagName: 'app-desktop',
       Controller: AppDesktopController
     })
@@ -68,7 +68,7 @@ export default class {
     const { default: { prefix, Views: { Index, others = {} }, Services = {} } }: PackageModule = await import(`/js/apps/${packageName}/main.js`)
     const tagName = packageName.toLowerCase().split('.').join('-')
     if (!window.customElements.get(tagName)) {
-      const { kernel } = this
+      const { core } = this
       const services = new Map<string, ServiceClass>()
       const servicesDeclarations = new Map<string, ServiceClass>()
       const nameServices = Object.keys(Services)
@@ -76,7 +76,7 @@ export default class {
         if (!dependences.includes(name)) {
           throw new DriverPermissionDenied(name)
         }
-        return await this.kernel.DriverManager.getDriver(name)
+        return await this.core.DriverManager.getDriver(name)
       }
       const getService = async (name: string) => {
         if (nameServices.length === 0) {
@@ -108,7 +108,7 @@ export default class {
         onMount = async () => {
           const indexTagName = `${prefix}-view-index`
           const windowInstance = this
-          kernel.defineWebComponent({
+          core.defineWebComponent({
             tagName: indexTagName,
             Controller: Index,
             prepareInstace(instance) {
@@ -129,7 +129,7 @@ export default class {
           if (others) {
             const viewNames: Lowercase<string>[] = Object.keys(others) as any
             for (const viewName of viewNames) {
-              kernel.defineWebComponent({
+              core.defineWebComponent({
                 tagName: `${prefix}-page-${viewName}`,
                 Controller: others[viewName],
                 prepareInstace(instance) {
@@ -152,7 +152,7 @@ export default class {
       })
     }
     const app = document.createElement(tagName)
-    const newTask = this.kernel.TaskManager.add<WindowComponent>({
+    const newTask = this.core.TaskManager.add<WindowComponent>({
       title,
       description: description || '',
       icon,

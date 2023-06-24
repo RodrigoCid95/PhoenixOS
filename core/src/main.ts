@@ -1,8 +1,8 @@
-import { ViewControllerClass, DefineWebComponentOptions, IDriverManager, IKernel, ITaskManager, ViewControllerConstructable } from 'phoenix-builder'
+import { ViewControllerClass, DefineWebComponentOptions, IDriverManager, ICore, ITaskManager, ViewControllerConstructable } from 'phoenix-builder'
 import { TaskManager } from 'clasess/task-manager'
 import { DriverManager } from 'drivers'
 
-class Kernel implements IKernel {
+class Core implements ICore {
   #TaskManager: TaskManager = new TaskManager()
   #DriverManager: DriverManager = new DriverManager()
   #viewControllers: Map<string, ViewControllerConstructable>
@@ -113,4 +113,4 @@ Object.defineProperty(window, 'ViewController', {
     return ViewController
   }
 })
-new Kernel()
+new Core()

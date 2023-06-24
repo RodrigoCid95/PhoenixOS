@@ -4,8 +4,8 @@ app/package-lock.json
 builder/node_modules
 builder/package-lock.json
 
-kernel/node_modules
-kernel/package-lock.json
+core/node_modules
+core/package-lock.json
 
 ionic-ui/dist
 ionic-ui/node_modules

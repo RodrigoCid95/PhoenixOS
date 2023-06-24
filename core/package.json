@@ -1,12 +1,12 @@
 {
-  "name": "kernel",
+  "name": "core",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "reinstall": "rm -R node_modules && rm -R package-lock.json && npm i",
-    "start": "pb start --input src --output ../www/js/kernel",
-    "build": "pb build --input src --output ../www/js/kernel"
+    "start": "pb start --input src --output ../www/js/core",
+    "build": "pb build --input src --output ../www/js/core"
   },
   "keywords": [],
   "author": "",

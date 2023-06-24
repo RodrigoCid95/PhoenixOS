@@ -24,7 +24,7 @@ export interface ViewControllerConstructable {
   new(): ViewControllerClass
 }
 export interface IDriver<T> {
-  new(kernel: IKernel): T
+  new(core: ICore): T
 }
 export type LoadView = LoadViewModule
 export type DefineWebComponentOptions = {
@@ -34,7 +34,7 @@ export type DefineWebComponentOptions = {
   prepareInstace?: (definition: ViewControllerClass) => ViewControllerClass
   shadowTemplate?: string
 }
-export interface IKernel {
+export interface ICore {
   readonly TaskManager: ITaskManager
   readonly DriverManager: IDriverManager
   defineWebComponent(options: DefineWebComponentOptions): void

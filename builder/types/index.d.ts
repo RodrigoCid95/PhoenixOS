@@ -1,2 +1,2 @@
-export * from './kernel'
+export * from './core'
 export * from './os'

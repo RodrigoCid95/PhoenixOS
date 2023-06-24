@@ -1,4 +1,4 @@
-import { IKernel, IDriverList } from "./kernel"
+import { IDriverList } from "./core"
 
 export declare class WindowComponent extends HTMLElement {
   icon: string
