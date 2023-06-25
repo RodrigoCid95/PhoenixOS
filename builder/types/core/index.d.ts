@@ -31,7 +31,7 @@ export type DefineWebComponentOptions = {
   tagName: string
   Controller: ViewControllerConstructable | LoadView
   prepareControllerClass?: (definition: ViewControllerConstructable) => ViewControllerConstructable
-  prepareInstace?: (definition: ViewControllerClass) => ViewControllerClass
+  prepareInstace?: (instance: ViewControllerClass) => ViewControllerClass
   shadowTemplate?: string
 }
 export interface ICore {

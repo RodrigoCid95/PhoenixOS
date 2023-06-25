@@ -1,4 +1,4 @@
-import { AppModule, IDriverList, IEmitters, ICore, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent } from 'phoenix-builder'
+import { AppModule, IDriverList, IEmitters, ICore, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent, ViewControllerClass } from 'phoenix-builder'
 import _spStyles from 'splash-screen/styles.scss'
 import _spTemplate from 'splash-screen/template.html'
 
@@ -58,7 +58,6 @@ export default class {
     document.body.innerHTML = '<app-desktop></app-desktop>'
   }
   async #init() {
-    (window as any).c = await this.core.DriverManager.getDriver('cipher')
     this.#showSplashScreen()
     await this.#loadUI()
     await this.#loadLogin()
@@ -108,44 +107,31 @@ export default class {
       window.customElements.define(tagName, class extends WindowComponent {
         onMount = async () => {
           const indexTagName = `${prefix}-view-index`
-          const windowInstance = this
+          this.innerHTML = `<ion-nav root="${indexTagName}"></ion-nav>`
+          const prepareControllerClass = (definition: ViewControllerConstructable) => {
+            Object.defineProperty(definition.prototype, 'getService', {
+              value: getService,
+              writable: false
+            })
+            Object.defineProperty(definition.prototype, 'windowElement', {
+              get() {
+                return this.viewElement?.parentElement?.parentElement
+              }
+            })
+            return definition
+          }
           core.defineWebComponent({
             tagName: indexTagName,
             Controller: Index,
-            prepareInstace(instance) {
-              Object.defineProperty(instance, 'windowElement', {
-                get() {
-                  return windowInstance
-                }
-              })
-              Object.defineProperty(instance, 'getService', {
-                get() {
-                  return getService
-                }
-              })
-              return instance
-            }
+            prepareControllerClass
           })
-          this.innerHTML = `<ion-nav root="${indexTagName}"></ion-nav>`
           if (others) {
             const viewNames: Lowercase<string>[] = Object.keys(others) as any
             for (const viewName of viewNames) {
               core.defineWebComponent({
                 tagName: `${prefix}-page-${viewName}`,
                 Controller: others[viewName],
-                prepareInstace(instance) {
-                  Object.defineProperty(instance, 'windowElement', {
-                    get() {
-                      return windowInstance
-                    }
-                  })
-                  Object.defineProperty(instance, 'getService', {
-                    get() {
-                      return getService
-                    }
-                  })
-                  return instance
-                }
+                prepareControllerClass
               })
             }
           }

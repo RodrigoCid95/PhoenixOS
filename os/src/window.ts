@@ -282,4 +282,7 @@ export class WindowComponent extends HTMLElement {
     this.#resizeObserver.unobserve(this)
     this.dispatchEvent(new CustomEvent('onClose'))
   }
+  close() {
+    this.remove()
+  }
 }

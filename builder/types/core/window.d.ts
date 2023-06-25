@@ -12,4 +12,5 @@ export interface IWindow extends HTMLElement {
   autoFullScreen: boolean
   readonly isFocus: boolean
   onMount?(): void | Promise<void>
+  close(): void
 }

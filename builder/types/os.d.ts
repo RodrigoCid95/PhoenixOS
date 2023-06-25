@@ -15,6 +15,7 @@ export declare class WindowComponent extends HTMLElement {
   readonly isFocus: boolean
   onMount?(): void | Promise<void>
   onClose?(): void | Promise<void>
+  close(): void
 }
 export interface IManifest {
   packageName: string

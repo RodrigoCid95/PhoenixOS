@@ -31,34 +31,32 @@ class Core implements ICore {
       customElements.define(tagName, class extends HTMLElement {
         #instanceController!: ViewControllerClass
         async connectedCallback(): Promise<void> {
-          if (viewControllers.has(tagName)) {
-            C = viewControllers.get(tagName)
-          } else {
+          if (!viewControllers.has(tagName)) {
             if (!C.isController) {
               C = (await C()).default
             }
-            viewControllers.set(tagName, C)
             if (prepareControllerClass) {
               C = prepareControllerClass(C)
             }
+            viewControllers.set(tagName, C)
           }
+          C = viewControllers.get(tagName)
           if (C.shadow) {
             this.attachShadow({ mode: 'open' })
           }
           if (this.shadowRoot) {
             this.shadowRoot.innerHTML = shadowTemplate
           }
-          if (prepareInstace) {
-            this.#instanceController = prepareInstace(new C())
-          } else {
-            this.#instanceController = new C()
-          }
+          this.#instanceController = new C()
           const _this = this
           Object.defineProperty(this.#instanceController, 'viewElement', {
             get() {
               return _this
             }
           })
+          if (prepareInstace) {
+            this.#instanceController = prepareInstace(this.#instanceController)
+          }
           if (C.template) {
             this.innerHTML = C.template
           }
