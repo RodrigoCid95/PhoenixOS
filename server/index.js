@@ -1,6 +1,4 @@
-const https = require("https")
 const http = require("http")
-const fs = require("fs")
 const path = require('path')
 const express = require("express")
 const app = express()
@@ -25,19 +23,10 @@ app.get('/', (req, res) => {
   res.send("Hello from express server.")
 })
 
+const port = process.env.PORT || 3000
+
 http
   .createServer(app)
-  .listen(3000, () => {
-    console.log('https://localhost:3000')
-  })
-https
-  .createServer(
-    {
-      key: fs.readFileSync("key.pem"),
-      cert: fs.readFileSync("cert.pem"),
-    },
-    app
-  )
-  .listen(3001, () => {
-    console.log('https://localhost:3001')
+  .listen(port, () => {
+    console.log(`https://localhost:${port}`)
   })

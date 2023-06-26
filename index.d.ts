@@ -1,5 +1,5 @@
 import { loadingController as LoadingController, modalController as ModalController, pickerController as PickerController, toastController as ToastController } from '@ionic/core'
-import { ViewControllerConstructable } from 'phoenix-builder'
+import { ServiceConstructable, ViewControllerConstructable } from 'phoenix-builder'
 
 declare global {
   interface Window {
@@ -8,5 +8,6 @@ declare global {
     pickerController: typeof PickerController
     toastController: typeof ToastController
     ViewController: ViewControllerConstructable
+    Service: ServiceConstructable
   }
 }

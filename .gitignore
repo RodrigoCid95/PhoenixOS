@@ -1,19 +1,7 @@
-app/node_modules
-app/package-lock.json
+node_modules
+package-lock.json
 
-builder/node_modules
-builder/package-lock.json
-
-core/node_modules
-core/package-lock.json
-
-ionic-ui/dist
 ionic-ui/node_modules
 ionic-ui/package-lock.json
 
-os/node_modules
-os/package-lock.json
-
-www/node_modules
-www/package-lock.json
-www/public/js
+server/public/js

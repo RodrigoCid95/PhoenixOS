@@ -8,14 +8,15 @@
   "collection": "./dist/collection/collection-manifest.json",
   "module": "./dist/index.js",
   "scripts": {
-    "build": "stencil build --prod"
+    "build": "rimraf ./../server/public/js/ionicui && stencil build --prod && mv ./dist/ionicui ./../server/public/js && rimraf ./dist"
   },
   "devDependencies": {
     "@ionic/core": "^7.0.10",
     "@stencil/core": "2.13.0",
     "ionicons": "^7.1.2",
     "phoenix-builder": "file:../builder",
-    "puppeteer": "^10.0.0"
+    "puppeteer": "^10.0.0",
+    "rimraf": "^5.0.1"
   },
   "license": "MIT"
 }

@@ -11,8 +11,7 @@ export const config: Config = {
     {
       type: 'dist',
       dir: 'dist',
-      esmLoaderPath: 'loader',
-      copy: [{ src: '../dist/ionicui', dest: '../../../www/public/js/ionicui' }]
+      esmLoaderPath: 'loader'
     }
   ]
 }

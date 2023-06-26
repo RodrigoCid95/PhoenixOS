@@ -1,6 +1,6 @@
-import { AppModule, IDriverList, IEmitters, ICore, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent, ViewControllerClass } from 'phoenix-builder'
-import _spStyles from 'splash-screen/styles.scss'
-import _spTemplate from 'splash-screen/template.html'
+import { AppModule, IDriverList, IEmitters, ICore, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent } from 'phoenix-builder'
+import _spStyles from './splash-screen/styles.scss'
+import _spTemplate from './splash-screen/template.html'
 
 class AppSplashScreen extends window.ViewController {
   static styles = [_spStyles]
@@ -25,7 +25,7 @@ export default class {
     await import(uiPath).then(({ initUI }) => initUI())
   }
   async #loadLogin(): Promise<void> {
-    const { default: AppLoginController } = await import('login')
+    const { default: AppLoginController } = await import('./login')
     this.core.defineWebComponent({
       tagName: 'app-login',
       Controller: AppLoginController
@@ -44,7 +44,7 @@ export default class {
   }
   async #loadDesktop(): Promise<void> {
     const emitters = await this.#prepareEmitter()
-    const { default: AppDesktopController } = await import('desktop')
+    const { default: AppDesktopController } = await import('./desktop')
     Object.defineProperty(AppDesktopController.prototype, 'emitters', {
       get() {
         return emitters

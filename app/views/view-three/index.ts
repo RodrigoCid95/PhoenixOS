@@ -1,4 +1,4 @@
-import IndexService from 'services'
+import IndexService from './../../services'
 import template from './template.html'
 
 export default class AppPageTwo extends window.ViewController {

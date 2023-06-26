@@ -1,6 +1,6 @@
 import { ViewControllerClass, DefineWebComponentOptions, IDriverManager, ICore, ITaskManager, ViewControllerConstructable } from 'phoenix-builder'
-import { TaskManager } from 'clasess/task-manager'
-import { DriverManager } from 'drivers'
+import { TaskManager } from './clasess/task-manager'
+import { DriverManager } from './drivers'
 
 class Core implements ICore {
   #TaskManager: TaskManager = new TaskManager()
