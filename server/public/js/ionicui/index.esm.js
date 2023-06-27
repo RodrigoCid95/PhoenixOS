@@ -1,0 +1,1 @@
+const i=async()=>{await fetch("/js/ionicui/ionicui.css").then((i=>i.text())).then((i=>{const c=document.createElement("style");c.innerHTML=i,document.head.append(c)})),await import("/js/ionicui/ionicui.esm.js")};export{i as initUI}

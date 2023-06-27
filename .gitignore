@@ -4,4 +4,6 @@ package-lock.json
 ionic-ui/node_modules
 ionic-ui/package-lock.json
 
-server/public/js
+server/public/js/apps
+server/public/js/core
+server/public/js/os
