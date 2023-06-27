@@ -4,6 +4,7 @@ package-lock.json
 ionic-ui/node_modules
 ionic-ui/package-lock.json
 
-server/public/js/apps
-server/public/js/core
-server/public/js/os
+public/js/apps
+public/js/core
+public/js/os
+.vercel

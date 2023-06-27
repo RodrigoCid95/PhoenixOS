@@ -2,16 +2,12 @@
   "name": "phoenixos",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "install:ui": "cd ./ionic-ui && npm i",
-    "build:app": "pb build --input app --output ./server/public/js/apps/com.app.test --manifest",
-    "build:core": "pb build --input core --output ./server/public/js/core",
-    "build:ui": "cd ./ionic-ui && npm run build",
-    "build:os": "pb build --input os --output ./server/public/js/os",
-    "build:all": "npm run build:app && npm run build:core && npm run build:ui && npm run build:os",
-    "start": "node ./server/index.js",
-    "deploy": "npm run install:ui && npm start"
+    "start": "vercel dev",
+    "build:app": "pb build --input app --output ./public/js/apps/com.app.test --manifest",
+    "build:core": "pb build --input core --output ./public/js/core",
+    "build:os": "pb build --input os --output ./public/js/os",
+    "build:all": "npm run build:app && npm run build:core && npm run build:os"
   },
   "keywords": [],
   "author": "",
