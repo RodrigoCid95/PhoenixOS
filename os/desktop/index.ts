@@ -1,15 +1,15 @@
-import { IEmitters, IManifest, ITask, IWindow, WindowComponent } from "phoenix-builder"
+import { ICore, IEmitters, IManifest, ITask, IWindow, WindowComponent } from "phoenix-builder"
 import _styles from './style.scss'
 import _template from './template.html'
+import LauncherController from "./launcher"
 
 export default class AppDesktopController extends window.ViewController {
 	static template = _template
 	static styles: CSSStyleSheet[] = [_styles]
 	static shadow: boolean = false
+	launch!: (manifest: IManifest) => Promise<void>
+	defineComponent!: ICore['defineWebComponent']
 	viewElement!: HTMLElement
-	#modalRef!: HTMLIonModalElement
-	#btnStartRef!: HTMLIonButtonElement
-	#desktopRef!: HTMLDivElement
 	#appList: IWindow[] = []
 	emitters!: IEmitters
 	#orderIndexes(start: number) {
@@ -23,32 +23,13 @@ export default class AppDesktopController extends window.ViewController {
 		}
 	}
 	async onMount() {
-		this.#modalRef = this.viewElement.querySelector('#launcher') as any
-		this.#modalRef.querySelector('ion-header ion-toolbar ion-buttons ion-button')?.addEventListener('click', () => this.#modalRef.dismiss())
-		this.#btnStartRef = this.viewElement.querySelector('#play') as any
-		this.#btnStartRef.addEventListener('click', () => this.#modalRef.present())
-		this.#desktopRef = this.viewElement.querySelector('.desktop') as any
-		const loading = await window.loadingController.create({ message: 'Cargando...' })
-		loading.present()
-		const appList: IManifest[] = await fetch('/apps').then(res => res.json())
-		const listRef = this.#modalRef.querySelector('ion-content ion-list')
-		for (const manifest of appList) {
-			const ionItem = document.createElement('ion-item')
-			ionItem.addEventListener('click', () => {
-				this.emitters.emmit('launch', manifest)
-				this.#modalRef.dismiss()
-			})
-			ionItem.style.cursor = 'pointer'
-			const ionThumbnail = document.createElement('ion-thumbnail')
-			ionThumbnail.slot = 'start'
-			ionThumbnail.innerHTML = `<img alt="${manifest.packageName}" src="${manifest.icon}" />`
-			ionItem.append(ionThumbnail)
-			const ionLabel = document.createElement('ion-label')
-			ionLabel.innerHTML = `${manifest.title}<p>${manifest.description}</p>`
-			ionItem.append(ionLabel)
-			listRef?.append(ionItem)
-		}
-		loading.dismiss()
+		Object.defineProperty(LauncherController.prototype, 'emitters', { value: this.emitters, writable: false })
+		Object.defineProperty(LauncherController.prototype, 'launch', { value: this.launch, writable: false })
+		Object.defineProperty(LauncherController.prototype, 'defineComponent', { value: this.defineComponent, writable: false })
+		this.defineComponent({
+			tagName: 'desktop-launcher',
+			Controller: LauncherController
+		})
 		this.emitters.on('add-app', (task: ITask<WindowComponent>) => {
 			const element = task.el
 			element.tabIndex = this.#appList.length
@@ -85,7 +66,8 @@ export default class AppDesktopController extends window.ViewController {
 			})
 			this.viewElement.querySelector('.tasks')?.append(btnTask)
 			this.#appList.push(element)
-			this.#desktopRef.append(element)
+			this.viewElement.querySelector('.desktop')!.append(element)
+			this.viewElement.querySelector('ion-modal')!.dismiss()
 		})
 	}
 }

@@ -22,7 +22,10 @@ export default class {
   }
   async #loadUI(): Promise<void> {
     const uiPath = '/js/ionicui/index.esm.js'
-    await import(uiPath).then(({ initUI }) => initUI())
+    const { initUI } = await import(uiPath)
+    const config = JSON.parse(localStorage.getItem('config') || '{}');
+    (window as any).Ionic = { config }
+    await initUI()
   }
   async #loadLogin(): Promise<void> {
     const { default: AppLoginController } = await import('./login')
@@ -35,21 +38,13 @@ export default class {
     document.body.append(appLogin)
     await new Promise(resolve => appLogin.addEventListener('onAuth', resolve))
   }
-  async #prepareEmitter(): Promise<IEmitters> {
+  async #loadDesktop(): Promise<void> {
     const eDriver = await this.core.DriverManager.getDriver('emitters')
     const emitters = new eDriver()
-    emitters.on('define-components', ({ tagName, Controller }: { tagName: string, Controller: ViewControllerConstructable }) => this.core.defineWebComponent({ tagName, Controller }))
-    emitters.on('launch', this.#launch.bind(this))
-    return emitters
-  }
-  async #loadDesktop(): Promise<void> {
-    const emitters = await this.#prepareEmitter()
     const { default: AppDesktopController } = await import('./desktop')
-    Object.defineProperty(AppDesktopController.prototype, 'emitters', {
-      get() {
-        return emitters
-      }
-    })
+    Object.defineProperty(AppDesktopController.prototype, 'defineComponent', { value: this.core.defineWebComponent.bind(this.core), writable: false })
+    Object.defineProperty(AppDesktopController.prototype, 'launch', { value: this.launch.bind(this), writable: false })
+    Object.defineProperty(AppDesktopController.prototype, 'emitters', { value: emitters, writable: false })
     this.core.defineWebComponent({
       tagName: 'app-desktop',
       Controller: AppDesktopController
@@ -64,7 +59,7 @@ export default class {
     this.#showSplashScreen()
     this.#loadDesktop()
   }
-  async #launch({ packageName, title, description, icon, dependences = [] }: IManifest): Promise<void> {
+  async launch({ packageName, title, description, icon, dependences = [] }: IManifest): Promise<void> {
     const { default: { prefix, Views: { Index, others = {} }, Services = {} } }: PackageModule = await import(`/js/apps/${packageName}/main.js`)
     const tagName = packageName.toLowerCase().split('.').join('-')
     if (!window.customElements.get(tagName)) {

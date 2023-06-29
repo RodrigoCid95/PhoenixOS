@@ -19,4 +19,12 @@ app-desktop .tasks {
 
 app-desktop .tasks ion-chip ion-label {
   user-select: none;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  app-desktop .tasks ion-chip ion-label {
+    user-select: none;
+    display: block;
+  }
 }

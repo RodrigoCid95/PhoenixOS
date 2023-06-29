@@ -1,3 +1,4 @@
+import _style from './style.scss'
 type WindowPosition = {
   isDragging: boolean
   currentX: number
@@ -173,12 +174,12 @@ export class WindowComponent extends HTMLElement {
     this.#autoFullScreen = true
     this.#callbackAutoFullScreen = ({ matches }) => {
       if (matches) {
-        this.setAttribute('fullscreen', '')
+        this.setAttribute('auto-full-screen', '')
       } else {
-        this.removeAttribute('fullscreen')
+        this.removeAttribute('auto-full-screen')
       }
     }
-    this.#matchMedia = window.matchMedia('(max-width: 452px)')
+    this.#matchMedia = window.matchMedia('(max-width: 769px)')
     this.attachShadow({ mode: 'open' })
   }
   async connectedCallback() {
@@ -186,9 +187,7 @@ export class WindowComponent extends HTMLElement {
       return
     }
     this.style.display = 'none'
-    const style = new CSSStyleSheet()
-    style.replaceSync(':host{position:absolute;outline:#222428 solid 1px;height:85%;width:500px;overflow:hidden}slot{display:flex;flex-direction:column;height:100%;overflow:auto}@media (min-width:992px){:host{height:50%}}@media (max-width:576px){:host([fullscreen]){width:100%!important;height:100%!important;top:0!important;left:0!important;resize:none!important;transform:unset!important}}')
-    this.shadowRoot?.adoptedStyleSheets.push(style)
+    this.shadowRoot?.adoptedStyleSheets.push(_style)
     this.width = this.width
     this.minWidth = this.minWidth
     this.maxWidth = this.maxWidth
@@ -207,7 +206,7 @@ export class WindowComponent extends HTMLElement {
         this.isResize = this.isResize
       }
       if (this.#matchMedia.matches && this.#autoFullScreen) {
-        this.setAttribute('fullscreen', '')
+        this.setAttribute('auto-full-screen', '')
       }
     })
     const draggableZone = this.shadowRoot.querySelector('slot') as HTMLSlotElement
@@ -267,7 +266,7 @@ export class WindowComponent extends HTMLElement {
     this.autoFullScreen = this.autoFullScreen
     requestAnimationFrame(() => {
       if (this.#matchMedia.matches && this.autoFullScreen) {
-        this.setAttribute('fullscreen', '')
+        this.setAttribute('auto-full-screen', '')
       }
     })
     if (this.onMount) {

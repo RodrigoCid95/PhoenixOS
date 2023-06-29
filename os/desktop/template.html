@@ -1,20 +1,6 @@
 <ion-app style="z-index: 0;">
   <div class="desktop" slot="desktop"></div>
-  <ion-modal id="launcher">
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Apps</ion-title>
-        <ion-buttons slot='end'>
-          <ion-button color='primary'>
-            <ion-icon slot='icon-only' name='close-outline' />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-list></ion-list>
-    </ion-content>
-  </ion-modal>
+  <desktop-launcher></desktop-launcher>
   <ion-footer style="z-index: 0;" translucent={true}>
     <ion-toolbar>
       <ion-buttons slot="start">
