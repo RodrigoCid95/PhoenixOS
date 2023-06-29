@@ -1,0 +1,6 @@
+{
+  "public": "public",
+  "rewrites": [
+    { "source": "/apps", "destination": "/apps.json" }
+  ]
+}
