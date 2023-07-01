@@ -6,4 +6,7 @@ export default class AppOne extends window.ViewController {
     this.viewElement.querySelector('[name="minimize"]')?.addEventListener('click', () => this.windowElement.minimize = true)
     this.viewElement.querySelector('[name="close"]')?.addEventListener('click', () => this.windowElement.close())
   }
+  onClose() {
+    console.log('onClose', this)
+  }
 }

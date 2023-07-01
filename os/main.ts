@@ -1,4 +1,4 @@
-import { AppModule, IDriverList, IEmitters, ICore, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent } from 'phoenix-builder'
+import { AppModule, IDriverList, IEmitters, ICore, IManifest, ServiceClass, ViewControllerConstructable, WindowComponent, IEmitter } from 'phoenix-builder'
 import _spStyles from './splash-screen/styles.scss'
 import _spTemplate from './splash-screen/template.html'
 
@@ -9,6 +9,8 @@ class AppSplashScreen extends window.ViewController {
 
 export default class {
   #emitters!: IEmitters
+  #defineLogin = false
+  #defineDesktop = false
   constructor(private core: ICore) {
     this.#init()
   }
@@ -28,36 +30,53 @@ export default class {
     await initUI()
   }
   async #loadLogin(): Promise<void> {
-    const { default: AppLoginController } = await import('./login')
-    this.core.defineWebComponent({
-      tagName: 'app-login',
-      Controller: AppLoginController
-    })
-    const appLogin = document.createElement('app-login')
-    document.body.innerHTML = ''
-    document.body.append(appLogin)
-    await new Promise(resolve => appLogin.addEventListener('onAuth', resolve))
+    if (!this.#defineLogin) {
+      const { default: AppLoginController } = await import('./login')
+      Object.defineProperty(AppLoginController.prototype, 'emitters', { value: this.#emitters, writable: false })
+      this.core.defineWebComponent({
+        tagName: 'app-login',
+        Controller: AppLoginController
+      })
+      this.#defineLogin = true
+    }
+    document.body.innerHTML = '<app-login></app-login>'
   }
   async #loadDesktop(): Promise<void> {
-    const eDriver = await this.core.DriverManager.getDriver('emitters')
-    const emitters = new eDriver()
-    const { default: AppDesktopController } = await import('./desktop')
-    Object.defineProperty(AppDesktopController.prototype, 'defineComponent', { value: this.core.defineWebComponent.bind(this.core), writable: false })
-    Object.defineProperty(AppDesktopController.prototype, 'launch', { value: this.launch.bind(this), writable: false })
-    Object.defineProperty(AppDesktopController.prototype, 'emitters', { value: emitters, writable: false })
-    this.core.defineWebComponent({
-      tagName: 'app-desktop',
-      Controller: AppDesktopController
-    })
-    this.#emitters = emitters
+    if (!this.#defineDesktop) {
+      const { default: AppDesktopController } = await import('./desktop')
+      Object.defineProperty(AppDesktopController.prototype, 'defineComponent', { value: this.core.defineWebComponent.bind(this.core), writable: false })
+      Object.defineProperty(AppDesktopController.prototype, 'launch', { value: this.launch.bind(this), writable: false })
+      Object.defineProperty(AppDesktopController.prototype, 'emitters', { value: this.#emitters, writable: false })
+      this.core.defineWebComponent({
+        tagName: 'app-desktop',
+        Controller: AppDesktopController
+      })
+      this.#defineDesktop = true
+    }
     document.body.innerHTML = '<app-desktop></app-desktop>'
   }
   async #init() {
     this.#showSplashScreen()
     await this.#loadUI()
-    await this.#loadLogin()
-    this.#showSplashScreen()
-    this.#loadDesktop()
+    const eDriver = await this.core.DriverManager.getDriver('emitters')
+    this.#emitters = new eDriver()
+    this.#emitters.on('auth', async auth => {
+      this.#showSplashScreen()
+      const { tasks } = this.core.TaskManager
+      for (const task of tasks) {
+        await task.kill()
+      }
+      if (typeof auth === 'boolean') {
+        if (auth) {
+          this.#loadDesktop()
+        } else {
+          await this.#loadLogin()
+        }
+      } else {
+        window.location.reload()
+      }
+    })
+    this.#emitters.emmit('auth', false)
   }
   async launch({ packageName, title, description, icon, dependences = [] }: IManifest): Promise<void> {
     const { default: { prefix, Views: { Index, others = {} }, Services = {} } }: PackageModule = await import(`/js/apps/${packageName}/main.js`)
@@ -130,6 +149,11 @@ export default class {
               })
             }
           }
+        }
+        onClose = () => {
+          services.forEach(async (service) => {
+            await service?.onKill()
+          })
         }
       })
     }

@@ -3,4 +3,7 @@ export default class IndexService extends window.Service {
     const gDriver = await this.getDriver('geolocation')
     return await gDriver.getCurrentPosition()
   }
+  onKill() {
+    console.log('onKill', this)
+  }
 }
