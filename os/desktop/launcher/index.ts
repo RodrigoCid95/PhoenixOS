@@ -18,7 +18,8 @@ export default class LauncherController extends window.ViewController {
       tagName: 'desktop-launcher-settings',
       Controller: () => import('./settings')
     })
-    const modalRef = this.viewElement.querySelector('ion-modal') as HTMLIonModalElement
+    const modalRef = this.viewElement.querySelector<any>('ion-modal')
+    modalRef.backdropDismiss = false
     modalRef.breakpoints = [0, .5, .75, 1]
     modalRef.addEventListener('ionModalWillPresent', () => {
       modalRef.innerHTML = '<ion-nav root="desktop-launcher-list"></ion-nav>'

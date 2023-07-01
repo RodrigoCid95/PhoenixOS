@@ -23,7 +23,7 @@ export default class {
   async #loadUI(): Promise<void> {
     const uiPath = '/js/ionicui/index.esm.js'
     const { initUI } = await import(uiPath)
-    const config = JSON.parse(localStorage.getItem('config') || '{}');
+    const config = JSON.parse(localStorage.getItem('ion-config') || '{}');
     (window as any).Ionic = { config }
     await initUI()
   }

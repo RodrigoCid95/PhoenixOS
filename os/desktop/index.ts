@@ -67,7 +67,7 @@ export default class AppDesktopController extends window.ViewController {
 			this.viewElement.querySelector('.tasks')?.append(btnTask)
 			this.#appList.push(element)
 			this.viewElement.querySelector('.desktop')!.append(element)
-			this.viewElement.querySelector('ion-modal')!.dismiss()
+			this.viewElement.querySelector<any>('ion-modal')!.dismiss()
 		})
 	}
 }

@@ -1,7 +1,6 @@
 import { IManifest } from 'phoenix-builder'
 import template from './template.html'
 
-
 export default class LauncherListController extends window.ViewController {
   static template: string = template
   launch!: (manifest: IManifest) => Promise<void>

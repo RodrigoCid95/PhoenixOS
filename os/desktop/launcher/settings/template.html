@@ -4,8 +4,30 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>Ajustes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button onclick="window.location.reload()">
+        <ion-icon slot="icon-only" name="reload-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
-  <h1>Ajustes</h1>
+  <ion-list>
+    <ion-item>
+      <ion-select name="animations" label="Animaciones" placeholder="Selecciona una opción" interface="action-sheet" cancel-text="Cancelar">
+        <ion-select-option aria-label="Habilitadas" value="">Habilitadas</ion-select-option>
+        <ion-select-option aria-label="Deshabilitadas" value="false">Deshabilitadas</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-select name="design" label="Diseño" placeholder="Selecciona una opción" interface="action-sheet" cancel-text="Cancelar">
+        <ion-select-option aria-label="Automático" value="">Automático</ion-select-option>
+        <ion-select-option aria-label="IOS" value="ios">IOS</ion-select-option>
+        <ion-select-option aria-label="Material Design" value="md">Material Design</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item name="textBackButtonItem">
+      <ion-input name="textBackButton" label="Texto de botón atrás"></ion-input>
+    </ion-item>
+  </ion-list>
 </ion-content>
