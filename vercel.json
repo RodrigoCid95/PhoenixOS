@@ -1,6 +1,6 @@
 {
   "routes": [
-    { "src": "/apps", "dest": "/data/apps.json" },
-    { "src": "/auth", "dest": "/data/auth.json" }
+    { "src": "/apps", "methods": ["POST"], "dest": "/data/apps.json" },
+    { "src": "/auth", "methods": ["POST"], "dest": "/data/auth.json" }
   ]
 }
