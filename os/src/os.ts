@@ -38,8 +38,7 @@ class PhoenixOS extends Kernel {
     const task = this.TaskManager.run<HTMLDivElement>({
       manifest: {
         packageName: 'com.splash.screen',
-        title: 'Pantalla de carga',
-        type: 'program'
+        title: 'Pantalla de carga'
       },
       module: {
         Views: {
@@ -65,8 +64,7 @@ class PhoenixOS extends Kernel {
     const task = this.TaskManager.run<HTMLDivElement>({
       manifest: {
         packageName: 'com.login.app',
-        title: 'Iniciar sesión',
-        type: 'program'
+        title: 'Iniciar sesión'
       },
       module: {
         Views: {
@@ -86,8 +84,7 @@ class PhoenixOS extends Kernel {
     const task = this.TaskManager.run<HTMLDivElement>({
       manifest: {
         packageName: 'com.desktop.app',
-        title: 'Entorno gráfico.',
-        type: 'program'
+        title: 'Entorno gráfico.'
       },
       module: {
         Views: {

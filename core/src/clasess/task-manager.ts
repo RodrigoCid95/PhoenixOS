@@ -4,13 +4,12 @@ import { LoadViewModule, ViewControllerConstructable, ViewController } from "../
 import { Emitter } from './drivers/emitter'
 import './view-controller'
 import './service'
-import { AppModule } from "../../types/app"
-import { GetService, ServiceConstructable } from "../../types/service"
+import { ServiceConstructable, Service } from "../../types/service"
 
 export class TM implements TaskManager {
   #tasks: Map<string, Task<any>>
   #emitters: TaskManagerEmitterList
-  #controllerDeclarations: Map<string, ViewController>
+  #controllerDeclarations: Map<string, ViewControllerConstructable>
   get tasks(): Task<any>[] {
     const results: Task<any>[] = []
     this.#tasks.forEach(task => results.push(task))
@@ -25,92 +24,20 @@ export class TM implements TaskManager {
       kill: new Emitter()
     }
   }
-  #defineView({ tagName, ViewController, getService }: DefineViewOptions) {
-    const _ = this
-    if (window.customElements.get(tagName) === undefined) {
-      window.customElements.define(tagName, class extends HTMLElement {
-        #instanceController!: ViewController
-        async connectedCallback() {
-          let C: any = ViewController
-          if (!_.#controllerDeclarations.has(tagName)) {
-            if (!C.isController) {
-              C = (await C()).default
-            }
-            _.#controllerDeclarations.set(tagName, C)
-          }
-          C = _.#controllerDeclarations.get(tagName)
-          this.#instanceController = new C()
-          const _this = this
-          Object.defineProperty(this.#instanceController, 'viewElement', {
-            get() {
-              return _this
-            }
-          })
-          Object.defineProperty(this.#instanceController, 'containerElement', {
-            get() {
-              return this.viewElement?.parentElement?.parentElement
-            }
-          })
-          Object.defineProperty(this.#instanceController, 'getService', {
-            get() {
-              return getService
-            }
-          })
-          if (C.shadow) {
-            this.attachShadow({ mode: 'open' })
-          }
-          if (C.shadowTemplate && this.shadowRoot) {
-            this.shadowRoot.innerHTML = C.shadowTemplate
-          }
-          if (C.template) {
-            this.innerHTML = C.template
-          }
-          if (C.styles) {
-            if (this.shadowRoot) {
-              for (const styleSheet of C.styles) {
-                this.shadowRoot.adoptedStyleSheets.push(styleSheet)
-              }
-            } else {
-              const styles = []
-              for (const { cssRules } of C.styles) {
-                let css: string[] = []
-                for (let index = 0; index < cssRules.length; index++) {
-                  const rule = cssRules.item(index)
-                  css.push(rule?.cssText || '')
-                }
-                styles.push(css.join('\n'))
-              }
-              const stylesElement = document.createElement('style')
-              stylesElement.innerHTML = styles.join('\n')
-              this.insertAdjacentElement('afterbegin', stylesElement)
-            }
-          }
-          if (this.#instanceController.onMount) {
-            this.#instanceController.onMount()
-          }
-        }
-        disconnectedCallback(): void {
-          if (this.#instanceController.onClose) {
-            this.#instanceController.onClose()
-          }
-        }
-      })
-    }
-  }
   run<T = HTMLElement>({ manifest, module, Container, system }: RunOptions): Task<T> {
+    const _ = this
     const PID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       const r = Math.random() * 16 | 0;
       const v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16)
     })
-    const killTask = () => this.kill(PID)
     const serviceList = new Map<string, ServiceConstructable>()
     const serviceiInstanceList = new Map<string, Service>()
     const getDriver = async (name: keyof DriverList) => {
       if (!manifest.dependences?.includes(name)) {
         throw new Error('No tienes permiso para acceder a este driver.')
       }
-      const driver = await this.driverManager.getDriver(name)
+      const driver = await _.driverManager.getDriver(name)
       return driver
     }
     const getService: any = async (name: string) => {
@@ -126,49 +53,128 @@ export class TM implements TaskManager {
           serviceList.set(name, Service)
         }
         const Service = serviceList.get(name) as ServiceConstructable
-        Object.defineProperty(Service.prototype, 'getDriver', {
-          get() {
-            return getDriver
-          }
-        })
+        Object.defineProperty(Service.prototype, 'getDriver', { value: getDriver, writable: false })
         serviceiInstanceList.set(name, new Service())
       }
       return serviceiInstanceList.get(name)
     }
+    const defineView = ({ tagName, ViewController }: DefineViewOptions) => {
+      if (window.customElements.get(tagName) === undefined) {
+        window.customElements.define(tagName, class extends HTMLElement {
+          #instanceController!: ViewController
+          async connectedCallback() {
+            let C: any = ViewController
+            if (!_.#controllerDeclarations.has(tagName)) {
+              if (!C.isController) {
+                C = (await C()).default
+              }
+              _.#controllerDeclarations.set(tagName, C)
+            }
+            C = _.#controllerDeclarations.get(tagName)
+            if (!Object.prototype.hasOwnProperty.call(C, 'instancesCount')) {
+              Object.defineProperty(C, 'instancesCount', { value: 0, writable: true })
+            }
+            C.instancesCount++
+            this.#instanceController = new C()
+            const _this = this
+            Object.defineProperty(this.#instanceController, 'viewElement', {
+              get() {
+                return _this
+              }
+            })
+            Object.defineProperty(this.#instanceController, 'containerElement', {
+              get() {
+                return this.viewElement?.parentElement?.parentElement
+              }
+            })
+            Object.defineProperty(this.#instanceController, 'getService', { value: getService, writable: false })
+            if (C.shadow) {
+              this.attachShadow({ mode: 'open' })
+            }
+            if (C.shadowTemplate && this.shadowRoot) {
+              this.shadowRoot.innerHTML = C.shadowTemplate
+            }
+            if (C.template) {
+              this.innerHTML = C.template
+            }
+            if (C.styles) {
+              if (this.shadowRoot) {
+                for (const styleSheet of C.styles) {
+                  this.shadowRoot.adoptedStyleSheets.push(styleSheet)
+                }
+              } else {
+                const styles = []
+                for (const { cssRules } of C.styles) {
+                  let css: string[] = []
+                  for (let index = 0; index < cssRules.length; index++) {
+                    const rule = cssRules.item(index)
+                    css.push(rule?.cssText || '')
+                  }
+                  styles.push(css.join('\n'))
+                }
+                const stylesElement = document.createElement('style')
+                stylesElement.innerHTML = styles.join('\n')
+                this.insertAdjacentElement('afterbegin', stylesElement)
+              }
+            }
+            if (this.#instanceController.onMount) {
+              this.#instanceController.onMount()
+            }
+          }
+          async disconnectedCallback() {
+            if (this.#instanceController.onClose) {
+              await this.#instanceController.onClose()
+            }
+            (_.#controllerDeclarations.get(tagName) as any).instancesCount--
+          }
+        })
+      }
+    }
     const tagName = manifest.packageName.toLowerCase().split('.').join('-')
     const indexTagName = `${module.Views.prefix}-index`
     const defineComponents = async () => {
-      this.#defineView({
+      defineView({
         tagName: indexTagName,
-        ViewController: module.Views.Index,
-        getService
+        ViewController: module.Views.Index
       })
       const { others = {} } = module.Views
       const keys: string[] = Object.keys(others)
       for (const key of keys) {
         const ModClass = others[key as any]
         const tag = `${module.Views.prefix}-${key}`
-        this.#defineView({
+        defineView({
           tagName: tag,
-          ViewController: ModClass,
-          getService
+          ViewController: ModClass
         })
+      }
+    }
+    const sanitizeServices = async (counter: number) => {
+      if (counter === 0) {
+        const iterator = serviceiInstanceList.values()
+        for (const item of iterator) {
+          await item?.onKill()
+        }
+        serviceiInstanceList.clear()
       }
     }
     if (Container) {
       if (window.customElements.get(tagName) === undefined) {
-        window.customElements.define(tagName, class extends Container {
+        window.customElements.define(tagName, class CustomContainer extends Container {
+          static instancesCount: number = 0
           async connectedCallback() {
+            CustomContainer.instancesCount++
             if (super.connectedCallback) {
               await super.connectedCallback()
             }
             defineComponents()
           }
           async disconnectedCallback() {
+            CustomContainer.instancesCount--
+            _.#kill((this as any).PID)
+            sanitizeServices(CustomContainer.instancesCount)
             if (super.disconnectedCallback) {
               await super.disconnectedCallback()
             }
-            killTask()
           }
         })
       }
@@ -176,56 +182,48 @@ export class TM implements TaskManager {
       const styles = new CSSStyleSheet()
       styles.replaceSync(`${tagName} {display: contents;}`)
       const ViewController: ViewControllerConstructable = (window as any).ViewController as any
-      this.#defineView({
+      defineView({
         tagName: tagName,
-        ViewController: class extends ViewController {
+        ViewController: class GenericContainer extends ViewController {
           static shadow: boolean = false
           static template: string = `<${indexTagName}></${indexTagName}>`
           static styles: CSSStyleSheet[] = [styles]
-          onClose = killTask
-          onMount = () => defineComponents()
-        },
-        getService
+          onMount = defineComponents
+          onClose = () => {
+            _.#kill((this.viewElement as any).PID)
+            sanitizeServices(GenericContainer.instancesCount)
+          }
+        }
       })
     }
-    const el = document.createElement(tagName) as T
-    const newTask: Task<T> = {
-      get PID() {
-        return PID
-      },
-      get icon() {
-        return manifest.icon
-      },
-      get title() {
-        return manifest.title
-      },
-      get description() {
-        return manifest.description || 'Sin descripción.'
-      },
-      get el() {
-        return el
-      },
-      get kill() {
-        return killTask
-      },
-      get system() {
-        return system
-      }
-    }
+    const el = document.createElement(tagName) as HTMLElement
+    Object.defineProperty(el, 'PID', { value: PID, writable: false })
+    const newTask: any = {}
+    Object.defineProperty(newTask, 'PID', { value: PID, writable: false })
+    Object.defineProperty(newTask, 'icon', { value: manifest.icon, writable: false })
+    Object.defineProperty(newTask, 'title', { value: manifest.title, writable: false })
+    Object.defineProperty(newTask, 'description', { value: manifest.description || 'Sin descripción.', writable: false })
+    Object.defineProperty(newTask, 'el', { value: el, writable: false })
+    Object.defineProperty(newTask, 'kill', { value: () => el.remove(), writable: false })
+    Object.defineProperty(newTask, 'system', { value: system, writable: false })
     this.#tasks.set(PID, newTask)
     this.#emitters.new.emmit()
     this.#emitters.change.emmit()
     return newTask
   }
-  kill(PID: string): void {
+  #kill(PID: string) {
     if (this.#tasks.has(PID)) {
-      const task = this.#tasks.get(PID)
-      if (task?.el instanceof HTMLElement) {
-        task.el.remove()
-      }
       this.#tasks.delete(PID)
       this.#emitters.kill?.emmit()
       this.#emitters.change?.emmit()
+    }
+  }
+  kill(PID: string): void {
+    if (this.#tasks.has(PID)) {
+      const task = this.#tasks.get(PID)
+      if (task?.el.isConnected) {
+        task.el.remove()
+      }
     }
   }
   on(event: TaskManagerEvent, callback: TaskManagerEventCallback): string {
@@ -239,5 +237,4 @@ export class TM implements TaskManager {
 type DefineViewOptions = {
   tagName: string
   ViewController: ViewControllerConstructable | LoadViewModule
-  getService: GetService
 }

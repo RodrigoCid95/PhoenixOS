@@ -5,6 +5,7 @@ export declare class ViewController<C = any> {
   static template: string
   static shadowTemplate: string
   static shadow: boolean
+  static readonly instancesCount: number
   readonly viewElement: HTMLElement
   readonly containerElement: C
   getService: GetService
@@ -16,6 +17,7 @@ export interface ViewControllerConstructable<C = any> {
   static template: string
   static shadowTemplate: string
   static shadow: boolean
+  static readonly instancesCount: number
   new(): ViewController<C>
 }
 export type ViewModule = { default: ViewControllerConstructable }

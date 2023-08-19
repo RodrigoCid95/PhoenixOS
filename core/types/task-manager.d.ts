@@ -2,7 +2,7 @@ import { EmitterDriver } from './drivers/emitter'
 import { AppModule } from './app'
 import { ViewControllerConstructable } from './view-controller'
 
-export interface Task<T> {
+export interface Task<T = HTMLElement> {
   readonly PID: string
   readonly icon?: string
   readonly title: string
@@ -26,7 +26,6 @@ export interface Manifest {
   author?: string[]
   icon?: string
   dependences?: Array<keyof DriverList>
-  type: 'program' | 'process'
 }
 export interface ContainerElement extends HTMLElement {
   connectedCallback?(): void | Promise<void>

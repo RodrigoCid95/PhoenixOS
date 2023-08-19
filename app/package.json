@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "phoenix-builder": "file:../builder",
     "phoenix-core": "file:../core",
     "phoenix-os": "file:../os"
   }

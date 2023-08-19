@@ -2,6 +2,7 @@ export class ViewController {
   static isController: boolean
   static template: string
   static shadow: boolean
+  static instancesCount: number
 }
 
 Object.defineProperty(ViewController, 'isController', { value: true, writable: false })

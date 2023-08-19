@@ -12,7 +12,8 @@ const getOpts = (entryPoints, outdir) => ({
   sourcemap: false,
   plugins,
   minify: true,
-  loader: { '.webp': 'dataurl', '.svg': 'dataurl' }
+  loader: { '.webp': 'dataurl', '.svg': 'dataurl' },
+  target: ['es2017']
 })
 
 module.exports = async ({ input, output, manifest, zipper }) => {
