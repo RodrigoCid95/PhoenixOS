@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@ionic/core": "^7.3.0",
     "phoenix-core": "file:../core"
   }
 }

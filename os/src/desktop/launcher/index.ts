@@ -3,7 +3,6 @@ import { EmittersDriver } from 'phoenix-core/types/drivers/emitter'
 
 export default class LauncherController extends window.ViewController {
   static template = template
-  static tag = ''
   emitters!: EmittersDriver
   async onMount() {
     const modalRef = this.viewElement.querySelector<any>('ion-modal')

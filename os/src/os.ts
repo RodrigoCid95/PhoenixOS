@@ -46,7 +46,8 @@ class PhoenixOS extends Kernel {
           prefix: 'splash',
           Index: AppSplashScreen as any
         }
-      }
+      },
+      system: true
     })
     document.body.innerHTML = ''
     document.body.append(task.el)
@@ -72,7 +73,8 @@ class PhoenixOS extends Kernel {
           prefix: 'login',
           Index: AppLoginController as any
         }
-      }
+      },
+      system: true
     })
     document.body.innerHTML = ''
     document.body.append(task.el)
@@ -113,7 +115,8 @@ class PhoenixOS extends Kernel {
                         const indexTagName = `${module.Views.prefix}-index`
                         this.innerHTML = `<ion-nav root="${indexTagName}"></ion-nav>`
                       }
-                    }
+                    },
+                    system: false
                   })
                   this.#emitters.emmit('add-app', task)
                 }, writable: false
@@ -124,10 +127,16 @@ class PhoenixOS extends Kernel {
               const { default: LauncherSettingsController } = await import('./desktop/launcher/settings')
               Object.defineProperty(LauncherSettingsController.prototype, 'emitters', { value: this.#emitters, writable: false })
               return { default: LauncherSettingsController as any }
+            },
+            'task-manager': async () => {
+              const { default: TaskManagerController } = await import('./desktop/task-manager')
+              Object.defineProperty(TaskManagerController.prototype, 'taskManager', { value: this.TaskManager, writable: false })
+              return { default: TaskManagerController }
             }
           }
         }
-      }
+      },
+      system: true
     })
     document.body.innerHTML = ''
     document.body.append(task.el)

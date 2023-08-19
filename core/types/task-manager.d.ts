@@ -9,6 +9,7 @@ export interface Task<T> {
   readonly description: string
   readonly el: T
   readonly kill(): void | Promise<void>
+  readonly system: boolean
 }
 export interface TaskConstructable<T> {
   new(): Task<T>
@@ -38,6 +39,7 @@ export interface RunOptions {
   manifest: Manifest
   module: AppModule
   Container?: ContainerConstructor
+  system: boolean
 }
 export type DefineWebComponentOptions = {
   tagName: string

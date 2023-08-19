@@ -148,6 +148,7 @@ export class WindowComponent extends HTMLElement {
     }
   }
   //#endregion public Setters
+  isWindowContainer = true
   constructor() {
     super()
     this.#icon = ''

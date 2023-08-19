@@ -97,7 +97,7 @@ export class TM implements TaskManager {
       })
     }
   }
-  run<T = HTMLElement>({ manifest, module, Container }: RunOptions): Task<T> {
+  run<T = HTMLElement>({ manifest, module, Container, system }: RunOptions): Task<T> {
     const PID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       const r = Math.random() * 16 | 0;
       const v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -207,6 +207,9 @@ export class TM implements TaskManager {
       },
       get kill() {
         return killTask
+      },
+      get system() {
+        return system
       }
     }
     this.#tasks.set(PID, newTask)
