@@ -1,0 +1,17 @@
+{
+  "name": "phoenix-core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "start": "pb start --input src --output dist",
+    "build": "pb build --input src --output dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "socket.io-client": "^4.7.2"
+  }
+}

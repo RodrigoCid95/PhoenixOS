@@ -1,0 +1,17 @@
+{
+  "name": "phoenix-os",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "start": "pb start --input src --output ../public/js/os",
+    "build": "pb build --input src --output ../public/js/os"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "phoenix-core": "file:../core"
+  }
+}

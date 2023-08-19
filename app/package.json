@@ -1,0 +1,17 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "pb start --input src --output ./../public/js/apps/com.app.test --manifest",
+    "build": "pb build --input src --output ./../public/js/apps/com.app.test --manifest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "phoenix-builder": "file:../builder",
+    "phoenix-core": "file:../core",
+    "phoenix-os": "file:../os"
+  }
+}

@@ -1,10 +1,15 @@
-node_modules
-package-lock.json
+app/node_modules
+app/package-lock.json
 
-ionic-ui/node_modules
-ionic-ui/package-lock.json
+builder/node_modules
+builder/package-lock.json
+
+core/dist
+core/node_modules
+core/package-lock.json
+
+os/node_modules
+os/package-lock.json
 
 public/js/apps
-public/js/core
 public/js/os
-.vercel
