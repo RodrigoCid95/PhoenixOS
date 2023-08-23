@@ -1,6 +1,7 @@
 app/node_modules
 app/public/js
 app/package-lock.json
+app/*.zip
 
 builder/node_modules
 builder/package-lock.json
