@@ -2,11 +2,10 @@
   "name": "phoenix-core",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/main.js",
+  "main": "src/main.ts",
   "types": "types/index.d.ts",
   "scripts": {
-    "start": "pb start --input src --output dist",
-    "build": "pb build --input src --output dist"
+    "postinstall": "pb build --input src --output dist"
   },
   "keywords": [],
   "author": "",

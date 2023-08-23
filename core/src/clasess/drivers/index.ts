@@ -39,19 +39,17 @@ export class Drivers implements DriverManager {
     },
     permissions: async () => {
       if (!this.#drivers.has('permissions')) {
-        const { PermissionsClass } = await import('./permissions')
-        this.#drivers.set('permissions', new PermissionsClass())
+        const { PermissionsDriver } = await import('./permissions')
+        this.#drivers.set('permissions', new PermissionsDriver())
       }
       return this.#drivers.get('permissions')
     },
-    server: async () => {
-      if (!this.#drivers.has('server')) {
-        const { Server } = await import('./server')
-        const eDriver = await this.getDriver('emitters')
-        const emitters = new eDriver()
-        this.#drivers.set('server', new Server(emitters))
+    'api-connector': async () => {
+      if (!this.#drivers.has('api-connector')) {
+        const { APIConnectorDriver } = await import('./api-connector')
+        this.#drivers.set('api-connector', APIConnectorDriver)
       }
-      return this.#drivers.get('server')
+      return this.#drivers.get('api-connector')
     }
   }
   async getDriver<K extends keyof DriverList>(name: K): Promise<DriverList[K]> {

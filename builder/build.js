@@ -22,7 +22,7 @@ module.exports = async ({ input, output, manifest, zipper }) => {
   if (fs.existsSync(outdir)) {
     fs.rmSync(outdir, { force: true, recursive: true })
   }
-  const mainAppPath = path.join(input, 'main.ts')
+  const mainAppPath = path.join(input, manifest ? 'app.ts' : 'main.ts')
   await build(getOpts([mainAppPath], outdir))
   if (manifest) {
     const packageName = path.basename(srcDir)

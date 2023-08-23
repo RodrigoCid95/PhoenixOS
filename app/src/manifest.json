@@ -5,5 +5,5 @@
   "author": [
     "Rodrigo Cid"
   ],
-  "dependences": ["geolocation"]
+  "dependences": ["geolocation", "api-connector"]
 }

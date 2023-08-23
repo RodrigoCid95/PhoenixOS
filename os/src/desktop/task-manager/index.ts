@@ -7,9 +7,9 @@ export default class TaskManagerController extends window.ViewController {
   #listElement!: HTMLIonListElement
   async onMount() {
     this.#listElement = this.viewElement.querySelector('ion-list') as HTMLIonListElement
-    document.getElementById('play')?.addEventListener('contextmenu', async e => {
+    document.getElementById('play')?.addEventListener('contextmenu', e => {
       e.preventDefault()
-      window.menuController.open('task-manager')
+      document.querySelector<HTMLIonMenuElement>('[content-id="play"]')?.open()
     })
     this.#generateAppList()
     this.taskManager.on('change', this.#generateAppList.bind(this))

@@ -1,6 +1,6 @@
 import { EmitterDriver, EmittersDriver } from './../../../types/drivers/emitter'
 import { EventCallback, LocalNotificationDriver, LocalNotificationsDriver } from './../../../types/drivers/notifications'
-import { PermissionsDriver } from './../../../types/drivers/permissions'
+import { Permissions } from './../../../types/drivers/permissions'
 
 class LocalNotification implements LocalNotificationDriver {
   #NOTIFICATION?: Notification
@@ -10,7 +10,7 @@ class LocalNotification implements LocalNotificationDriver {
   lang: string = ''
   tag: string = ''
   title: string = ''
-  constructor(private permissions: PermissionsDriver, private emitter: EmitterDriver) { }
+  constructor(private permissions: Permissions, private emitter: EmitterDriver) { }
   async #checkPermission() {
     const PERMISSION = await this.permissions.query('notifications')
     if (PERMISSION === 'denied') {
@@ -54,7 +54,7 @@ class LocalNotification implements LocalNotificationDriver {
   }
 }
 export class LocalNotifications implements LocalNotificationsDriver {
-  constructor(private permissions: PermissionsDriver, private emitters: EmittersDriver) { }
+  constructor(private permissions: Permissions, private emitters: EmittersDriver) { }
   createNotification(): LocalNotificationDriver {
     return new LocalNotification(this.permissions, this.emitters.createEmitter())
   }

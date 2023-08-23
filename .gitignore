@@ -1,4 +1,5 @@
 app/node_modules
+app/public/js
 app/package-lock.json
 
 builder/node_modules
@@ -8,7 +9,9 @@ core/dist
 core/node_modules
 core/package-lock.json
 
+os/dist
 os/node_modules
+os/public/js
 os/package-lock.json
 
 public/js/apps

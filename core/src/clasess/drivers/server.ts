@@ -1,6 +1,5 @@
 import { EmittersDriver } from './../../../types/drivers/emitter'
 import { CreateAPIConnectorOpts, APIConnector, ServerConnector, WebSocketsConnector } from './../../../types/drivers/server'
-import { Cipher } from './cipher'
 
 export class Server implements ServerConnector {
   constructor(private emitters: EmittersDriver) { }
@@ -8,8 +7,8 @@ export class Server implements ServerConnector {
     const { WebScoketsConnectorClass } = await import('./web-sckets-connector')
     return new WebScoketsConnectorClass(this.emitters, host)
   }
-  async createAPIConnector(opts: CreateAPIConnectorOpts, cipher?: Cipher): Promise<APIConnector> {
+  async createAPIConnector(opts: CreateAPIConnectorOpts): Promise<APIConnector> {
     const { APIConnectorClass } = await import('./api-connector')
-    return new APIConnectorClass(opts, cipher)
+    return new APIConnectorClass(opts)
   }
 }

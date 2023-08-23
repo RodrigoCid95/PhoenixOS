@@ -1,23 +1,37 @@
 const sass = require('sass')
+const postcss = require('postcss')
+const autoprefixer = require('autoprefixer')
+const postcssNested = require('postcss-nested')
 const fs = require('fs')
 const assert = require('assert')
 const htmlMinifier = require('html-minifier-terser')
+const UglifyCSS = require('uglifycss')
 
 module.exports = [
   {
-    name: 'css',
+    name: 'sass',
     setup(build) {
       build.onLoad({ filter: /\.scss$/ }, async ({ path }) => {
         const opts = {}
         if (build.initialOptions.minify) {
           opts['style'] = 'compressed'
         }
-        const { css } = await sass.compileAsync(path, opts)
-        let code = '`\n' + css + '\n`'
+        const { css } = sass.compile(path, opts)
+        const code = (await postcss([autoprefixer, postcssNested]).process(css, { from: path })).css.replace(/`/gi, "'")
+        return { contents: `const css = new CSSStyleSheet();css.replaceSync(\`${code}\`);export default css;`, loader: 'js' }
+      })
+    }
+  },
+  {
+    name: 'css',
+    setup(build) {
+      build.onLoad({ filter: /\.css$/ }, async ({ path }) => {
+        const css = fs.readFileSync(path, { encoding: 'utf8' })
+        let code = (await postcss([autoprefixer, postcssNested]).process(css, { from: path })).css.replace(/`/gi, "'")
         if (build.initialOptions.minify) {
-          code = `'${css}'`
+          code = UglifyCSS.processString(code)
         }
-        return { contents: `const css = new CSSStyleSheet();css.replaceSync(${code});export default css;`, loader: 'js' }
+        return { contents: `const css = new CSSStyleSheet();css.replaceSync(\`${code}\`);export default css;`, loader: 'js' }
       })
     }
   },

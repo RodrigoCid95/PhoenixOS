@@ -2,17 +2,21 @@
   "name": "phoenix-os",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/main.js",
+  "main": "src/main.ts",
   "types": "types/index.d.ts",
   "scripts": {
-    "start": "pb start --input src --output ../public/js/os",
-    "build": "pb build --input src --output ../public/js/os"
+    "dev": "pb start --input src --output public/js",
+    "postinstall": "pb build --input src --output dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@ionic/core": "^7.3.0",
+    "phoenix-builder": "file:../builder",
     "phoenix-core": "file:../core"
+  },
+  "dependencies": {
+    "ionic-ui": "file:../ionic"
   }
 }

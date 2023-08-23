@@ -1,8 +1,8 @@
 import { WatchPositionOptions, GeolocationDriver } from './../../../types/drivers/geolocation'
-import { PermissionsDriver } from './../../../types/drivers/permissions'
+import { Permissions } from './../../../types/drivers/permissions'
 
 export class Geolocation implements GeolocationDriver {
-  constructor(private permissions: PermissionsDriver) { }
+  constructor(private permissions: Permissions) { }
   async #checkPermission() {
     const PERMISSION = await this.permissions.query('geolocation')
     if (PERMISSION === 'denied') {

@@ -4,37 +4,39 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>Ajustes</ion-title>
-    <ion-buttons slot="end">
-      <ion-button name="reload">
-        <ion-icon slot="icon-only" name="reload-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
   <ion-tabs>
     <ion-tab tab="profile">
-      <h1>Perfil</h1>
+      <ion-content>
+        <ion-text color="primary">
+          <h1>Perfil</h1>
+        </ion-text>
+      </ion-content>
     </ion-tab>
     <ion-tab tab="ionic">
-      <ion-list>
-        <ion-item>
-          <ion-select name="animations" label="Animaciones" placeholder="Selecciona una opción" interface="action-sheet" cancel-text="Cancelar">
-            <ion-select-option aria-label="Habilitadas" value="">Habilitadas</ion-select-option>
-            <ion-select-option aria-label="Deshabilitadas" value="false">Deshabilitadas</ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-item>
-          <ion-select name="design" label="Diseño" placeholder="Selecciona una opción" interface="action-sheet" cancel-text="Cancelar">
-            <ion-select-option aria-label="Automático" value="">Automático</ion-select-option>
-            <ion-select-option aria-label="IOS" value="ios">IOS</ion-select-option>
-            <ion-select-option aria-label="Material Design" value="md">Material Design</ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-item name="textBackButtonItem">
-          <ion-input name="textBackButton" label="Texto de botón atrás"></ion-input>
-        </ion-item>
-      </ion-list>
+      <ion-content>
+        <ion-list>
+          <ion-item>
+            <ion-select name="animations" label="Animaciones" placeholder="Selecciona una opción" interface="action-sheet" cancel-text="Cancelar">
+              <ion-select-option aria-label="Habilitadas" value="">Habilitadas</ion-select-option>
+              <ion-select-option aria-label="Deshabilitadas" value="false">Deshabilitadas</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-select name="design" label="Diseño" placeholder="Selecciona una opción" interface="action-sheet" cancel-text="Cancelar">
+              <ion-select-option aria-label="Automático" value="">Automático</ion-select-option>
+              <ion-select-option aria-label="IOS" value="ios">IOS</ion-select-option>
+              <ion-select-option aria-label="Material Design" value="md">Material Design</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item name="textBackButtonItem">
+            <ion-input name="textBackButton" label="Texto de botón atrás"></ion-input>
+          </ion-item>
+        </ion-list>
+        <ion-button expand="block" color="primary" name="reload">Aplicar cambios</ion-button>
+      </ion-content>
     </ion-tab>
     <ion-tab-bar slot="top">
       <ion-tab-button tab="profile">

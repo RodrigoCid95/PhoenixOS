@@ -34,13 +34,9 @@ export interface WebSocketsConnector {
   off(event: string, listener: any): void
   emit<T = void>(event: string, data?: object): Promise<T>
 }
-export type CreateAPIConnectorOpts = {
-  path: string
-  host?: string
-}
 export interface ServerConnector {
   createRealTimeConnector(host?: string): Promise<WebSocketsConnector>
-  createAPIConnector(opts: CreateAPIConnectorOpts, cipher?: ICipher): Promise<APIConnector>
+  createAPIConnector(opts: CreateAPIConnectorOpts): Promise<APIConnector>
 }
 export type Response<T> = {
   data: T

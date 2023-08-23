@@ -1,5 +1,4 @@
-import { CipherDriver } from './../../../types/drivers/cipher'
-import { APIConnector, CreateAPIConnectorOpts, UploadArgs } from '../../../types/drivers/server'
+import { APIConnector, CreateAPIConnectorOpts, UploadArgs } from "../../../types/drivers/api-connector"
 
 enum Methods {
   POST = 'POST',
@@ -7,16 +6,12 @@ enum Methods {
   PUT = 'PUT',
   DELETE = 'DELETE'
 }
-export class APIConnectorClass implements APIConnector {
+export class APIConnectorDriver implements APIConnector {
   #headers?: Headers
   #endpoint: string
-  #keyCipher!: CryptoKey
-  constructor(private opts: CreateAPIConnectorOpts, private cipher?: CipherDriver) {
-    const { host, path } = this.opts
-    this.#endpoint = `${host}/${path}`
-    if (this.cipher) {
-      this.cipher.generateKey().then(key => this.#keyCipher = key)
-    }
+  constructor(private opts: CreateAPIConnectorOpts = { path: [] }) {
+    const { host = document.baseURI, path } = this.opts
+    this.#endpoint = (new URL(path.join('/'), host)).href
   }
   setHeaders(headers?: any): void {
     if (headers) {
@@ -30,44 +25,45 @@ export class APIConnectorClass implements APIConnector {
       this.#headers = undefined
     }
   }
-  #prepareFetchOpts(method: string, data?: any) {
-    const fetchOpts: any = { method }
+  #prepareFetchOpts(options: { method?: string, data?: any }) {
+    const { method, data } = options
+    const fetchOpts: any = {}
+    if (method) {
+      Object.defineProperty(fetchOpts, 'method', { value: method, writable: false })
+    }
     if (data) {
-      if (this.cipher) {
-        const newData = this.cipher.encrypt(this.#keyCipher, JSON.stringify(data))
-        fetchOpts['body'] = newData
-      } else {
-        fetchOpts['body'] = JSON.stringify(data)
-      }
+      Object.defineProperty(fetchOpts, 'body', { value: JSON.stringify(data), writable: false })
     }
     if (this.#headers) {
-      fetchOpts['headers'] = this.#headers
+      Object.defineProperty(fetchOpts, 'headers', { value: this.#headers, writable: false })
     }
     return fetchOpts
   }
   async create<T>(data: T): Promise<void> {
-    const fetchOpts = this.#prepareFetchOpts(Methods.POST, data)
+    const fetchOpts = this.#prepareFetchOpts({ method: Methods.POST, data })
     await fetch(this.#endpoint, fetchOpts)
   }
-  async read<T>(query: Partial<T>): Promise<T[]> {
-    const fetchOpts = this.#prepareFetchOpts(Methods.GET, query)
-    const response = await fetch(this.#endpoint, fetchOpts)
-    if (this.cipher) {
-      let strRes = await response.text()
-      strRes = await this.cipher.decrypt(this.#keyCipher, strRes)
-      const objRes = JSON.parse(strRes)
-      return objRes
-    } else {
-      const objRes = await response.json()
-      return objRes
+  async read<T>(query?: Partial<T>): Promise<T[]> {
+    const fetchOpts = this.#prepareFetchOpts({})
+    let uri = this.#endpoint
+    if (query) {
+      const params = []
+      for (const key in query) {
+        const value = query[key]
+        params.push(`${key}=${value}`)
+      }
+      uri = `${this.#endpoint}?${params.join('&')}`
     }
+    const response = await fetch(uri, fetchOpts)
+    const objRes = await response.json()
+    return objRes
   }
   async update<T>(query: Partial<T>, data: Partial<T>): Promise<void> {
-    const fetchOpts = this.#prepareFetchOpts(Methods.PUT, { query, data })
+    const fetchOpts = this.#prepareFetchOpts({ method: Methods.PUT, data: { query, data } })
     await fetch(this.#endpoint, fetchOpts)
   }
   async delete<T>(query: Partial<T>): Promise<void> {
-    const fetchOpts = this.#prepareFetchOpts(Methods.DELETE, query)
+    const fetchOpts = this.#prepareFetchOpts({ method: Methods.DELETE, data: query })
     await fetch(this.#endpoint, fetchOpts)
   }
   upload(uploadArgs: UploadArgs): void {
