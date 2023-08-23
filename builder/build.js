@@ -13,7 +13,8 @@ const getOpts = (entryPoints, outdir) => ({
   plugins,
   minify: true,
   loader: { '.webp': 'dataurl', '.svg': 'dataurl' },
-  target: ['es2017']
+  target: ['es2017'],
+  legalComments: 'none'
 })
 
 module.exports = async ({ input, output, manifest, zipper }) => {

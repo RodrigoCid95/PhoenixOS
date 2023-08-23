@@ -80,50 +80,21 @@ export class PhoenixOS extends Kernel {
     document.body.append(task.el)
   }
   async #loadDesktop(): Promise<void> {
-    const { default: AppDesktopController } = await import('./desktop')
-    Object.defineProperty(AppDesktopController.prototype, 'taskManager', { value: this.TaskManager, writable: false })
-    Object.defineProperty(AppDesktopController.prototype, 'emitters', { value: this.#emitters, writable: false })
+    const { getModule } = await import('./desktop/module')
     const task = this.TaskManager.run<HTMLDivElement>({
       manifest: {
         packageName: 'com.desktop.app',
         title: 'Entorno gráfico.'
       },
-      module: {
-        Views: {
-          prefix: 'desktop',
-          Index: AppDesktopController as any,
-          others: {
-            launcher: async () => {
-              const { default: LauncherController } = await import('./desktop/launcher')
-              Object.defineProperty(LauncherController.prototype, 'emitters', { value: this.#emitters, writable: false })
-              Object.defineProperty(LauncherController.prototype, 'taskManager', { value: this.TaskManager, writable: false })
-              return { default: LauncherController as any }
-            },
-            'launcher-list': async () => {
-              const { default: LauncherListController } = await import('./desktop/launcher/list')
-              Object.defineProperty(LauncherListController.prototype, 'emitters', { value: this.#emitters, writable: false })
-              Object.defineProperty(LauncherListController.prototype, 'launch', {
-                value: async (manifest: Manifest) => {
-                  const pathApp = `/js/apps/${manifest.packageName}/main.js`
-                  const { default: module }: { default: AppModule } = await import(pathApp)
-                  this.#launch(manifest, module)
-                }, writable: false
-              })
-              return { default: LauncherListController as any }
-            },
-            'launcher-settings': async () => {
-              const { default: LauncherSettingsController } = await import('./desktop/launcher/settings')
-              Object.defineProperty(LauncherSettingsController.prototype, 'emitters', { value: this.#emitters, writable: false })
-              return { default: LauncherSettingsController as any }
-            },
-            'task-manager': async () => {
-              const { default: TaskManagerController } = await import('./desktop/task-manager')
-              Object.defineProperty(TaskManagerController.prototype, 'taskManager', { value: this.TaskManager, writable: false })
-              return { default: TaskManagerController }
-            }
-          }
+      module: getModule({
+        emitters: this.#emitters,
+        taskManager: this.TaskManager,
+        launch: async (manifest: Manifest) => {
+          const pathApp = `/js/apps/${manifest.packageName}/main.js`
+          const { default: module }: { default: AppModule } = await import(pathApp)
+          this.#launch(manifest, module)
         }
-      },
+      }),
       system: true
     })
     document.body.innerHTML = ''
