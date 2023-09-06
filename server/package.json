@@ -1,0 +1,23 @@
+{
+	"name": "server",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "phoenix start",
+		"build": "phoenix build"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"phoenix-js": "github:RodrigoCid95/PhoenixJS"
+	},
+	"phoenix": {
+		"type": "http",
+		"boot": "auto",
+		"resources": [
+			"public"
+		]
+	}
+}
