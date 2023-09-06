@@ -15,5 +15,8 @@ os/node_modules
 os/public/js
 os/package-lock.json
 
-public/js/apps
-public/js/os
+server/node_modules
+server/package-lock.json
+server/public/js
+server/.debugger
+server/.release

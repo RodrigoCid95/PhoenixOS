@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "pb start --input src --output public/js",
+    "start": "pb start --input src --output ../server/public/js",
     "build": "pb build --input src --output dist --manifest",
     "package": "pb build --input src --output com.app.test --manifest --zipper"
   },
